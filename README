@@ -2,3 +2,14 @@ Metamaterial Superlens: Finite Size Effects.
 
 Code should be run in fortran90/95 which generates data files which are then plotted by the MATLAB scripts.
 
+
+The gaussian codes are newer still and use a gaussian waveform instead of single ray
+The parametised code is newer than the unparametised.
+The unparametised code is probably useless for the dielectric but may be useful for the metal.
+
+
+
+History
+
+
+26/02/2012 - set up github, uploaded fortran code and matlab scripts

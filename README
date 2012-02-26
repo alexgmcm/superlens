@@ -1,0 +1,4 @@
+Metamaterial Superlens: Finite Size Effects.
+
+Code should be run in fortran90/95 which generates data files which are then plotted by the MATLAB scripts.
+

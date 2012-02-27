@@ -11,8 +11,8 @@ implicit none !doesn't assume types from names, must be declared explicitly
 double precision :: x = 0.0, z = 0.0, thetai, eta, xstepfrac, zstepfrac, kxstepfrac
 double precision :: xi, zi, c=300000000, xf, zf, Eyout, PI, Eyout2, eps1, mu1, mu2, g, co1,co2
 complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, n1, n2, test, kc, eps2
-integer*4 :: m, n, p, xsize, zsize !, SIZE
-character :: filename*80
+integer*4 :: m, n, p, xsize, zsize,tilen !, SIZE
+character :: filename*80, ti*10
 double precision, dimension(:), allocatable :: xarray
 double precision, dimension(:), allocatable :: zarray
 complex*16, dimension(0:200) :: kxarray
@@ -46,7 +46,7 @@ eta = 3 !go from 0.1 to 5, dimensionless parameter equal to d/lambda
 
 eps1=1
 mu1=1
-eps2=(2.0,0)
+eps2=(10,0)
 mu2=1
 
 
@@ -55,10 +55,11 @@ g = 0.5
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
 
-if (RealPart(n2) < 0) then
+if ((RealPart(n2) < 0 .and. RealPart(eps2) > 0) .or. &
+ (RealPart(eps2) < 0 .and. mu2<0 .and. RealPart(n2) > 0 )) then
 	n2 = -1 * n2
 end if
-!print *, n2
+print *,"n2=", n2
 
 !Ey=(0,0); I=(0,0); R=(0,0); C=(0,0); D=(0,0); T=(0,0); kx=(0,0); kz=(0,0)
 
@@ -73,6 +74,8 @@ end if
 !x and z are now parametised forms equivalent to normal x and z divided by lambda
 
 kc = (n1*(2*PI*eta)*SIN(PI/4)) !normally SIN(pi/4)
+ti = '0.25pi'
+tilen=LEN(TRIM(ti))
 print *, 'kc=', kc 
 kxstepfrac = (n1*(2*PI*eta)*SIN(PI/2))/100.0
 
@@ -124,7 +127,7 @@ do p=1, 200
 	J = (1*kz2*EXP(-i*kz2))/(2*PI*eta*mu2)
 	K=(-1*kz1*EXP(i*kz1))/(2*PI*eta*mu1)
 	
-	print *, "vals1:", A, B, C2, D2, F, G2, H, I2, J, K
+	!print *, "vals1:", A, B, C2, D2, F, G2, H, I2, J, K
 	test = (2*PI*eta*mu1)
 	
 	Ie = (1.0,0.0)
@@ -136,8 +139,7 @@ do p=1, 200
 	!print *,"vals2:", De, Te, Ce, Re
 
 
-	write(filename,20) eta,'eta', g,'g', RealPart(eps2), 'eps2gaussdielecfieldmap.dat'
-	
+	write(filename,20) 'data/',ti(1:tilen),'rads',eta,'eta', g,'g', RealPart(eps2), 'eps2gaussdielecfieldmap.dat'
 	open(unit=2,file= filename)
 	
 
@@ -211,6 +213,6 @@ do m=0, zsize
 	end do
 end do
 10	format(4e15.5,4e15.5,4e15.5,4e15.5)
-20 	format(f3.1,A,f3.1,A,f4.1,A)
+20 	format(A,A,A,f3.1,A,f3.1,A,f4.1,A)
 
 end program fieldmap

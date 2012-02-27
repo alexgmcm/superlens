@@ -7,9 +7,15 @@ The gaussian codes are newer still and use a gaussian waveform instead of single
 The parametised code is newer than the unparametised.
 The unparametised code is probably useless for the dielectric but may be useful for the metal.
 
+Data (fortran output) is stored in /data as .dat files with four columns which are the x,z,abs(field) and realpart(field) values respectively
+the filenames illustrate the parameter values.
+
+Plots (MATLAB output) are stored in /plots as .png files with parameters recorded in the titles of the plots and filenames
 
 
 History
 
+27/06/2012 - set up directories for data and plots, made sme basic plots of positive refraction in dielectric (parametised),
+		tried and failed to code for negative refractive index and imaginary epsilon (losses/metals).
 
 26/02/2012 - set up github, uploaded fortran code and matlab scripts

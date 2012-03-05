@@ -7,12 +7,12 @@ zstepfrac=0.05;
 xstepfrac=0.05;
 size=int32(((zf-zi)/(zstepfrac)+1));
 eta = 3;
-eps2=-1;
-mu2=-1;
+eps2=2;
+mu2=1;
 kxc='0.25pi';
 
  
-g=[1.0]; 
+g=[0.5]; 
 for x=1:1
 g(x) = round(g(x)*10^1)/(10^1);
 end

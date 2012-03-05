@@ -15,7 +15,10 @@ Plots (MATLAB output) are stored in /plots as .png files with parameters recorde
 
 History
 
-27/06/2012 - set up directories for data and plots, made sme basic plots of positive refraction in dielectric (parametised),
-		tried and failed to code for negative refractive index and imaginary epsilon (losses/metals).
+28/06/2012 - correctly parametrised the gaussian (i.e. using g=g_unparam/lambda resulting in a division by eta**2), got negative refraction to
+work correctly by fixing signs of kz2, took plots with various angles of incidence and g values and demonstrated negative refraction 
+
+27/06/2012 - set up directories for data and plots, made some basic plots of positive refraction in dielectric (parametised),
+tried and failed to code for negative refractive index and imaginary epsilon (losses/metals).
 
 26/02/2012 - set up github, uploaded fortran code and matlab scripts

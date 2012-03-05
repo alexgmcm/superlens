@@ -46,11 +46,11 @@ eta = 3 !go from 0.1 to 5, dimensionless parameter equal to d/lambda
 
 eps1=1
 mu1=1
-eps2=(10,0)
-mu2=1
+eps2=(-1,0)
+mu2=-1
 
 
-g = 0.5
+g = 1
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
@@ -116,6 +116,16 @@ do p=1, 200
 	kz2 = SQRT((n2*(2*PI*eta))**2 - kxarray(p)**2)
 	kz1 = SQRT((n1*(2*PI*eta))**2 - kxarray(p)**2)
 	!print *, "kvals:", kz2, kz1
+
+	if ((RealPart(kz2) > 0) .and. (RealPart(n2) < 0)) then
+		kz2 = -kz2
+	end if
+	
+	if (RealPart(kz1) < 0) then
+		kz1 = -kz1
+	end if
+
+	
 	kx=kxarray(p)
 	
 
@@ -193,7 +203,7 @@ do m=0, zsize
 		do p=1, 200-1
 
 			fieldtransformed(n,m)=fieldtransformed(n,m)+ &
-			Eyarray(n,m,p)*co1*EXP(co2*((kxarray(p) - kc)**2) + i*kxarray(p)*xarray(n)/eta)*kxstepfrac
+			Eyarray(n,m,p)*co1*EXP((co2*((kxarray(p) - kc)**2)/(eta**2)) + i*kxarray(p)*xarray(n)/eta)*kxstepfrac
 			!print *, Eyarray(n,m,p), n , m, p
 			!print *, "Eyarray, n=",n,"m=",m,"p=",p,"val=",Eyarray(n,m,p)
 			!print *, "fieldtransformed, n=",n,"m=",m,"val=",fieldtransformed(n,m)

@@ -1,18 +1,18 @@
 
-zi=-5;
-xi=-5;
-zf=5;
-xf=5;
-zstepfrac=0.05;
-xstepfrac=0.05;
+zi=-10;
+xi=-10;
+zf=10;
+xf=10;
+zstepfrac=0.1;
+xstepfrac=0.1;
 size=int32(((zf-zi)/(zstepfrac)+1));
 eta = 3;
-eps2=-1;
-mu2=-1;
-kxc='0.25pi';
+eps2=2;
+mu2=1;
+kxc='0.33pi';
 
  
-g=[1.0]; 
+g=[3.0]; 
 for x=1:1
 g(x) = round(g(x)*10^1)/(10^1);
 end

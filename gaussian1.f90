@@ -19,12 +19,12 @@ complex*16, dimension(0:200) :: kxarray
 complex*16, dimension(:,:,:), allocatable :: Eyarray
 complex*16, dimension(:,:), allocatable :: fieldtransformed
 
-zi=-5
-xi=-5
-zf=5
-xf=5
-zstepfrac=0.05
-xstepfrac=0.05
+zi=-10
+xi=-10
+zf=10
+xf=10
+zstepfrac=0.1
+xstepfrac=0.1
 
 xsize = int(((xf-xi)/xstepfrac)) + 1
 zsize = int(((zf-zi)/zstepfrac)) + 1
@@ -46,11 +46,11 @@ eta = 3 !go from 0.1 to 5, dimensionless parameter equal to d/lambda
 
 eps1=1
 mu1=1
-eps2=(-1,0)
-mu2=-1
+eps2=(2,0)
+mu2=1
 
 
-g = 1
+g = 3
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
@@ -73,8 +73,8 @@ print *,"n2=", n2
 !initial values of x and z
 !x and z are now parametised forms equivalent to normal x and z divided by lambda
 
-kc = (n1*(2*PI*eta)*SIN(PI/4)) !normally SIN(pi/4)
-ti = '0.25pi'
+kc = (n1*(2*PI*eta)*SIN(PI/3)) !normally SIN(pi/4)
+ti = '0.33pi'
 tilen=LEN(TRIM(ti))
 print *, 'kc=', kc 
 kxstepfrac = (n1*(2*PI*eta)*SIN(PI/2))/100.0

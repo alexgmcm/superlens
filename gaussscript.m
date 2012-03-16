@@ -6,10 +6,10 @@ xf=10;
 zstepfrac=0.1;
 xstepfrac=0.1;
 size=int32(((zf-zi)/(zstepfrac)+1));
-eta = 3;
-eps2=2;
+eta = 1;
+eps2=1;
 mu2=1;
-kxc='0.33pi';
+thetai='0.25pi';
 
  
 g=[3.0]; 
@@ -21,7 +21,7 @@ data=zeros(sizesquare, 4, 7);
 
 for x=1:1
 num2str(g(x), '%3.1f');
-data(:,:,x) = load(strcat('data/',kxc,'rads',num2str(eta, '%3.1f'),'eta',num2str(g(x), '%3.1f'),'g',num2str(eps2, '%4.1f'),'eps2gaussdielecfieldmap.dat'));
+data(:,:,x) = load(strcat('data/',thetai,'rads',num2str(eta, '%3.1f'),'eta',num2str(g(x), '%3.1f'),'g',num2str(eps2, '%4.1f'),'eps2gaussdielecfieldmap.dat'));
 end
 
 for x=1:1
@@ -68,20 +68,20 @@ k=imagesc(xarray,zarray,eyarray);
 xlabel('x/lambda');
 ylabel('z/lambda');
 %zlabel('Ey');
-title(strcat('g=',num2str(g(1)),',kxc=',num2str(kxc),',mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',num2str(eta) ));
+title(strcat('g=',num2str(g(1)),',thetai=',num2str(thetai),',mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',num2str(eta) ));
 colorbar;
 line([xi xf],[eta eta],'linewidth',4,'Color', 'k');
 line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng', strcat('plots/im_kxc',kxc,'_g',num2str(g(1)),'_eta',num2str(eta),'_eps11_eps2',num2str(eps2),'mu2=',num2str(mu2),'.png'));
+print('-dpng', strcat('plots/im_thetai',thetai,'_g',num2str(g(1)),'_eta',num2str(eta),'_eps11_eps2',num2str(eps2),'mu2=',num2str(mu2),'.png'));
 
 
 k=imagesc(xarray,zarray,eyrparray);
 xlabel('x/lambda');
 ylabel('z/lambda');
 %zlabel('Ey');
-title(strcat('real part: g=',num2str(g(1)),',kxc=',num2str(kxc),',mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',num2str(eta) ));
+title(strcat('real part: g=',num2str(g(1)),',thetai=',num2str(thetai),',mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',num2str(eta) ));
 colorbar;
 line([xi xf],[eta eta],'linewidth',4,'Color', 'k');
 line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng', strcat('plots/real_im_kxc',kxc,'_g',num2str(g(1)),'_eta',num2str(eta),'_eps11_eps2',num2str(eps2),'mu2=',num2str(mu2),'.png'));
+print('-dpng', strcat('plots/real_im_thetai',thetai,'_g',num2str(g(1)),'_eta',num2str(eta),'_eps11_eps2',num2str(eps2),'mu2=',num2str(mu2),'.png'));
 end

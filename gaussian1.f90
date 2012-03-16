@@ -9,7 +9,7 @@ implicit none !doesn't assume types from names, must be declared explicitly
 
 ! Declare stuff here
 double precision :: x = 0.0, z = 0.0, thetai, eta, xstepfrac, zstepfrac, kxstepfrac
-double precision :: xi, zi, c=300000000, xf, zf, Eyout, PI, Eyout2, eps1, mu1, mu2, g, co1,co2
+double precision :: xi, zi, c=300000000, xf, zf, Eyout, PI, Eyout2, eps1, mu1, mu2, g, co1,co2, temp
 complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, n1, n2, test, kc, eps2
 integer*4 :: m, n, p, xsize, zsize,tilen !, SIZE
 character :: filename*80, ti*10
@@ -40,13 +40,13 @@ i = (0.0,1.0)
 !Can just use normal functions as modern fortran can determine the type required, 
 !specialist csqrt etc. are obsolete
 
-eta = 3 !go from 0.1 to 5, dimensionless parameter equal to d/lambda
+eta = 1 !go from 0.1 to 5, dimensionless parameter equal to d/lambda
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
 
 eps1=1
 mu1=1
-eps2=(2,0)
+eps2=(1,0)
 mu2=1
 
 
@@ -73,11 +73,11 @@ print *,"n2=", n2
 !initial values of x and z
 !x and z are now parametised forms equivalent to normal x and z divided by lambda
 
-kc = (n1*(2*PI*eta)*SIN(PI/3)) !normally SIN(pi/4)
-ti = '0.33pi'
-tilen=LEN(TRIM(ti))
+kc = (n1*(2.0*PI*eta)*SIN(PI/4.0)) !normally SIN(pi/4)
+ti = '0.25pi'
+tilen=LEN(TRIM(ti)) !this is just for filename purposes
 print *, 'kc=', kc 
-kxstepfrac = (n1*(2*PI*eta)*SIN(PI/2))/100.0
+kxstepfrac = (n1*(2*PI*eta)*SIN(PI/2.0))/100.0
 
 
 do p=0, xsize
@@ -88,7 +88,7 @@ do p=0, zsize
 	zarray(p)= zi + p*zstepfrac
 end do
 do p=0, 200
-	kxarray(p)= -(n1*(2*PI*eta)*SIN(PI/2)) + p*kxstepfrac !used to be 0+ 
+	kxarray(p)= -(n1*(2*PI*eta)*SIN(PI/2.0)) + p*kxstepfrac !used to be 0+ 
 	!print *, kxarray(p)
 end do
 
@@ -98,13 +98,14 @@ end do
 
 
 
-print *, "shape=", shape(Eyarray)
+print *, "kxshape=", shape(kxarray)
+print *, "kx start ", kxarray(0), " kx end ", kxarray(200)
 
 
 !SIZE= (((zf-zi)/zstepfrac)*((xf-xi)/xstepfrac))
 !double precision, dimension(0:SIZE) :: xarray, yarray, Eyarray
 
-do p=1, 200
+do p=1, 199 !should be from 0 to 200, but then you get singularities...
 	!thetai = p*(PI/12.0)
 	!kx=n1*(2*PI*eta)*SIN(thetai)
 	if (mod(p,10)==0) then
@@ -113,9 +114,17 @@ do p=1, 200
 	!kx is now a parametised kx where w/c is replaced by 2*PI*eta, 
 	!therefore is multiplied by factor of d over normal kx
 
-	kz2 = SQRT((n2*(2*PI*eta))**2 - kxarray(p)**2)
-	kz1 = SQRT((n1*(2*PI*eta))**2 - kxarray(p)**2)
-	!print *, "kvals:", kz2, kz1
+	kz2 = SQRT((n2*(2.0*PI*eta))**2 - kxarray(p)**2)
+	kz1 = SQRT((n1*(2.0*PI*eta))**2 - kxarray(p)**2)
+	
+
+	if (aimag(kz2) < 0.0005) then
+		kz2 = real(kz2)
+	end if
+
+	if (aimag(kz1) < 0.0005) then
+		kz1 = real(kz1)
+	end if
 
 	if ((RealPart(kz2) > 0) .and. (RealPart(n2) < 0)) then
 		kz2 = -kz2
@@ -124,7 +133,7 @@ do p=1, 200
 	if (RealPart(kz1) < 0) then
 		kz1 = -kz1
 	end if
-
+	!print *, "kvals:", kz2, kz1
 	
 	kx=kxarray(p)
 	
@@ -132,13 +141,13 @@ do p=1, 200
 
 	! Remove d term from exponential arguments because this is factored into new parametised k
 	! replace c/w with 1/(2*PI*eta)
-	A = EXP(i*kz2); B=EXP(-i*kz2); C2=EXP(i*kz1); D2=(-1*kz1)/(2*PI*eta*mu1); F=(1*kz1)/(2*PI*eta*mu1)
-	G2 = (-1*kz2)/(2*PI*eta*mu2); H = (1*kz2)/(2*PI*eta*mu2); I2=(-1*kz2*EXP(i*kz2))/(2*PI*eta*mu2)
-	J = (1*kz2*EXP(-i*kz2))/(2*PI*eta*mu2)
-	K=(-1*kz1*EXP(i*kz1))/(2*PI*eta*mu1)
+	A = EXP(i*kz2); B=EXP(-i*kz2); C2=EXP(i*kz1); D2=(-1.0*kz1)/(2.0*PI*eta*mu1); F=(1.0*kz1)/(2.0*PI*eta*mu1)
+	G2 = (-1.0*kz2)/(2.0*PI*eta*mu2); H = (1.0*kz2)/(2.0*PI*eta*mu2); I2=(-1.0*kz2*EXP(i*kz2))/(2.0*PI*eta*mu2)
+	J = (1.0*kz2*EXP(-i*kz2))/(2.0*PI*eta*mu2)
+	K=(-1.0*kz1*EXP(i*kz1))/(2.0*PI*eta*mu1)
 	
 	!print *, "vals1:", A, B, C2, D2, F, G2, H, I2, J, K
-	test = (2*PI*eta*mu1)
+	test = (2.0*PI*eta*mu1)
 	
 	Ie = (1.0,0.0)
 	De = ((D2-F)*(C2*I2 - A*K))/((H-F)*(A*K - C2*I2) + (G2-F)*(K*B - C2*J) )
@@ -193,20 +202,23 @@ do n=0, xsize
 end do
 
 
-co1=(g/(2*sqrt(PI)))
+co1=(g/(2.0*sqrt(PI)))
 co2=-0.25*(g**2)
+print *, co1, co2
 do m=0, zsize
 	if (mod(m,100)==0) then 
 		print *, m
 	end if
 	do n=0, xsize
-		do p=1, 200-1
-
+		do p=1, 199 !again singularities at 0,200 despite these being the actual limits
+			!print *, EXP((co2*((kxarray(p) - kc)**2)/(eta**2)) + i*kxarray(p)*xarray(n)/eta)
+			!print *, kxarray(0)
+			!print *, kxstepfrac
 			fieldtransformed(n,m)=fieldtransformed(n,m)+ &
 			Eyarray(n,m,p)*co1*EXP((co2*((kxarray(p) - kc)**2)/(eta**2)) + i*kxarray(p)*xarray(n)/eta)*kxstepfrac
-			!print *, Eyarray(n,m,p), n , m, p
 			!print *, "Eyarray, n=",n,"m=",m,"p=",p,"val=",Eyarray(n,m,p)
 			!print *, "fieldtransformed, n=",n,"m=",m,"val=",fieldtransformed(n,m)
+			!print *, fieldtransformed(0,0)
 		end do		
 	end do
 end do

@@ -1,9 +1,9 @@
-! fieldmap.f90
-! Written: 22/01/2012
+! gaussian1.f90
 ! By: Alex mcMurray and Alun Daley
 ! Takes equations derived from EM boundary conditions
 ! for double interface and uses them to plot field map of Ey
-! over x and z.
+! over x and z and kx. Then calculates the field plot of a gaussian beam
+! by completing a fourier transform integrating over kx
 program fieldmap
 implicit none !doesn't assume types from names, must be declared explicitly
 
@@ -29,6 +29,7 @@ xstepfrac=0.1
 xsize = int(((xf-xi)/xstepfrac)) + 1
 zsize = int(((zf-zi)/zstepfrac)) + 1
 
+!allocate arrays with desired shape
 allocate(xarray(0:xsize))
 allocate(zarray(0:zsize))
 allocate(Eyarray(0:xsize,0:zsize,0:201))
@@ -36,7 +37,6 @@ allocate(fieldtransformed(0:xsize,0:zsize))
 
 PI=4.D0*DATAN(1.D0) ! ensures maximum precision on any architechture apparently
 i = (0.0,1.0)
-!CSIN is complex?? etc.
 !Can just use normal functions as modern fortran can determine the type required, 
 !specialist csqrt etc. are obsolete
 
@@ -61,16 +61,6 @@ if ((RealPart(n2) < 0 .and. RealPart(eps2) > 0) .or. &
 end if
 print *,"n2=", n2
 
-!Ey=(0,0); I=(0,0); R=(0,0); C=(0,0); D=(0,0); T=(0,0); kx=(0,0); kz=(0,0)
-
-!open(unit=2,file='fieldmap.dat') !makes output file, in unit 1
-
-!m and n are dimensionless integers defined as integer steps of a fraction of d
-
-!might want to use arrays as that will make it easier to keep track of values
-!real, dimension(0:9) :: examplearray to make array from 0 index not 1.
-
-!initial values of x and z
 !x and z are now parametised forms equivalent to normal x and z divided by lambda
 
 kc = (n1*(2.0*PI*eta)*SIN(PI/4.0)) !normally SIN(pi/4)
@@ -93,21 +83,8 @@ do p=0, 200
 end do
 
 
-
-
-
-
-
-print *, "kxshape=", shape(kxarray)
-print *, "kx start ", kxarray(0), " kx end ", kxarray(200)
-
-
-!SIZE= (((zf-zi)/zstepfrac)*((xf-xi)/xstepfrac))
-!double precision, dimension(0:SIZE) :: xarray, yarray, Eyarray
-
 do p=1, 199 !should be from 0 to 200, but then you get singularities...
-	!thetai = p*(PI/12.0)
-	!kx=n1*(2*PI*eta)*SIN(thetai)
+	!progress counter
 	if (mod(p,10)==0) then
 	 print *, p
 	end if
@@ -133,7 +110,6 @@ do p=1, 199 !should be from 0 to 200, but then you get singularities...
 	if (RealPart(kz1) < 0) then
 		kz1 = -kz1
 	end if
-	!print *, "kvals:", kz2, kz1
 	
 	kx=kxarray(p)
 	
@@ -146,7 +122,6 @@ do p=1, 199 !should be from 0 to 200, but then you get singularities...
 	J = (1.0*kz2*EXP(-i*kz2))/(2.0*PI*eta*mu2)
 	K=(-1.0*kz1*EXP(i*kz1))/(2.0*PI*eta*mu1)
 	
-	!print *, "vals1:", A, B, C2, D2, F, G2, H, I2, J, K
 	test = (2.0*PI*eta*mu1)
 	
 	Ie = (1.0,0.0)
@@ -155,43 +130,25 @@ do p=1, 199 !should be from 0 to 200, but then you get singularities...
 	Ce = ((D2-F)*(K*B - J*C2))/((H-F)*(A*K - C2*I2) + (G2-F)*(K*B - C2*J) )
 	Re = Ce + De - 1.0
 
-	!print *,"vals2:", De, Te, Ce, Re
-
-
 	write(filename,20) 'data/',ti(1:tilen),'rads',eta,'eta', g,'g', RealPart(eps2), 'eps2gaussdielecfieldmap.dat'
 	open(unit=2,file= filename)
 	
 
 	do m=0, zsize-1
 		z= zarray(m) !define z in terms of m and d
-		!primes are dimensionless parameters
 		do n=0, xsize-1
 			!define x and z in their loops so they update each time
-			!define x in terms of m and d
 			!divide exponential terms by eta in order to compensate for parametisation
 			x = xarray(n)
 			if (z<=0) then 
 				Eyarray(n,m,p) = Ie*EXP((i*kx*x)/eta)*EXP((i*kz1*z)/eta) + Re*EXP((i*kx*x)/eta)*EXP((-i*kz1*z)/eta)
-				!print *, "EY: ", Ey
 			else if((z>float(0)) .and. (z<eta)) then
 				Eyarray(n,m,p) = Ce*EXP((i*kx*x)/eta)*EXP((i*kz2*z)/eta) + De*EXP((i*kx*x)/eta)*EXP((-i*kz2*z)/eta)
 			else
 				Eyarray(n,m,p) = Te*EXP((i*kx*x)/eta)*EXP((i*kz1*z)/eta)
 			end if
-
-			!define x and z and Ey arrays here, and fill them.
-			!xarray(n+ (m*((5-xi)/xstepfrac))) = x
-			!zarray(n+ (m*((5-xi)/xstepfrac))) = z
-			!Eyarray(n+ (m*((5-xi)/xstepfrac))) = Ey
-			!Eyout = abs(Ey)
-			!Eyout2=RealPart(Ey)
-			!write(2,10) x, z, Eyout, Eyout2
-
-
-		end do
-			
+		end do		
 	end do
-
 end do
 
 
@@ -211,26 +168,18 @@ do m=0, zsize
 	end if
 	do n=0, xsize
 		do p=1, 199 !again singularities at 0,200 despite these being the actual limits
-			!print *, EXP((co2*((kxarray(p) - kc)**2)/(eta**2)) + i*kxarray(p)*xarray(n)/eta)
-			!print *, kxarray(0)
-			!print *, kxstepfrac
 			fieldtransformed(n,m)=fieldtransformed(n,m)+ &
 			Eyarray(n,m,p)*co1*EXP((co2*((kxarray(p) - kc)**2)/(eta**2)) + i*kxarray(p)*xarray(n)/eta)*kxstepfrac
-			!print *, "Eyarray, n=",n,"m=",m,"p=",p,"val=",Eyarray(n,m,p)
-			!print *, "fieldtransformed, n=",n,"m=",m,"val=",fieldtransformed(n,m)
-			!print *, fieldtransformed(0,0)
 		end do		
 	end do
 end do
 
-!work out how to export to matlab and plot
 
 do m=0, zsize
 	if (mod(m,100)==0) then 
 		print *, m
 	end if
 	do n=0, xsize
-		!print *, "realfieldtransformed, n=",n,"m=",m,"val=",RealPart(fieldtransformed(n,m))
 		write(2,10) xarray(n), zarray(m), abs(fieldtransformed(n,m)), RealPart(fieldtransformed(n,m))
 	end do
 end do

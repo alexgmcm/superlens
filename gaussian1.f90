@@ -158,8 +158,8 @@ do n=0, xsize
 	end do
 end do
 
-
-co1=(g/(2.0*sqrt(PI)))
+!constants outside to as only evaluated once, g is parametised as g/lambda
+co1=(g/(2.0*sqrt(PI)*eta))
 co2=-0.25*(g**2)
 print *, co1, co2
 do m=0, zsize

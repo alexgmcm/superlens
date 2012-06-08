@@ -6,10 +6,10 @@ xf=10;
 zstepfrac=0.1;
 xstepfrac=0.1;
 size=int32(((zf-zi)/(zstepfrac)+1));
-eta = 1;
-eps2=1;
-mu2=1;
-thetai='0.25pi';
+eta = 3;
+eps2=-1;
+mu2=-1;
+thetai='0.16pi';
 
  
 g=[3.0]; 

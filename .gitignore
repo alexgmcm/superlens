@@ -2,3 +2,7 @@ a.out
 /data/*
 /plots/*
 a.out
+
+data/0.25pirads1.0eta3.0g1.0eps2gaussdielecfieldmap.dat
+
+data/0.25pirads3.0eta3.0g-1.0eps2gaussdielecfieldmap.dat

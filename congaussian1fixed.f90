@@ -49,7 +49,7 @@ eta=3
 
 eps1=1.0
 mu1=1.0
-eps2=(5.0,0.0)
+eps2=(10.0,0.0)
 mu2=1.0
 thetai=PI/4.0
 
@@ -133,7 +133,7 @@ do p=1, 199 !should be from 0 to 200, but then you get singularities...
 	Ce = ((D2-F)*(K*B - J*C2))/((H-F)*(A*K - C2*I2) + (G2-F)*(K*B - C2*J) )
 	Re = Ce + De - 1.0
 
-	write(filename,20) 'data/',ti(1:tilen),'rads',eta,'eta', g,'g', RealPart(eps2), 'eps2gaussdielecfieldmap.dat'
+	write(filename,20) 'data/PId4.0rads3eta3.0g10.0eps2gaussdielecfieldmap.dat'
 	open(unit=2,file= filename)
 	
 

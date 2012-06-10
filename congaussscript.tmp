@@ -7,7 +7,7 @@ zstepfrac=0.1;
 xstepfrac=0.1;
 size=int32(((zf-zi)/(zstepfrac)+1));
 eta=3;
-eps2=5.0;
+eps2=10.0;
 mu2=1.0;
 thetai='PI/4.0';
 
@@ -21,7 +21,7 @@ data=zeros(sizesquare, 4, 7);
 
 for x=1:1
 num2str(g(x), '%3.1f');
-data(:,:,x) = load(strcat('data/',thetai,'rads',num2str(eta, '%3.1f'),'eta',num2str(g(x), '%3.1f'),'g',num2str(eps2, '%4.1f'),'eps2gaussdielecfieldmap.dat'));
+data(:,:,x) = load('data/PId4.0rads3eta3.0g10.0eps2gaussdielecfieldmap.dat');
 end
 
 for x=1:1
@@ -56,7 +56,7 @@ title(strcat('g=',num2str(g(1)),',thetai=',num2str(thetai),',mu1=1, mu2=',num2st
 colorbar;
 line([xi xf],[eta eta],'linewidth',4,'Color', 'k');
 line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng', strcat('plots/im_thetai',thetai,'_g',num2str(g(1)),'_eta',num2str(eta),'_eps11_eps2',num2str(eps2),'mu2=',num2str(mu2),'.png'));
+print('-dpng','plots/im_PId4.0rads3eta3.0g10.0eps2gaussdielecfieldmap.png');
 
 
 k=imagesc(xarray,zarray,eyrparray);
@@ -66,5 +66,5 @@ title(strcat('real part: g=',num2str(g(1)),',thetai=',num2str(thetai),',mu1=1, m
 colorbar;
 line([xi xf],[eta eta],'linewidth',4,'Color', 'k');
 line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng', strcat('plots/real_im_thetai',thetai,'_g',num2str(g(1)),'_eta',num2str(eta),'_eps11_eps2',num2str(eps2),'mu2=',num2str(mu2),'.png'));
+print('-dpng','plots/real_PId4.0rads3eta3.0g10.0eps2gaussdielecfieldmap.png');
 end

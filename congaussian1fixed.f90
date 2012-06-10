@@ -47,13 +47,13 @@ eta=3
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
 
-eps1=3.0
-mu1=3.0
-eps2=(-3.0,0.0)
-mu2=-3.0
-thetai=PI/3.0
+eps1=1.0
+mu1=1.0
+eps2=(5.0,0.0)
+mu2=1.0
+thetai=PI/4.0
 
-g=3
+g=3.0
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
@@ -67,7 +67,7 @@ print *,"n2=", n2
 !x and z are now parametised forms equivalent to normal x and z divided by lambda
 
 kc = (n1*(2.0*PI*eta)*SIN(thetai)) !normally SIN(pi/4)
-ti = '0.16pi'
+ti='PI/4.0'
 tilen=LEN(TRIM(ti)) !this is just for filename purposes
 print *, 'kc=', kc 
 kxstepfrac = (n1*(2*PI*eta)*SIN(PI/2.0))/100.0

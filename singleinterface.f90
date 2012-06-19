@@ -11,9 +11,9 @@ program singleinterface
 implicit none !doesn't assume types from names, must be declared explicitly
 
 ! Declare stuff here - check these are all necessary
-double precision :: x = 0.0, z = 0.0, thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac
+double precision :: x = 0.0, z = 0.0, thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde, kz2tilde
 double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, Eyout, PI, Eyout2, sigmatilde, temp, eps1, eps2, mu1, mu2, n1, n2
-complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, test, kc, integral, r, t, kz1tilde, kz2tilde
+complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, test, kc, integral, r, t, kz1tilde
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen !, SIZE
 character :: filename*80, ti*10
 double precision, dimension(:), allocatable :: xtildearray
@@ -97,12 +97,12 @@ do m=0, ztildesize
 		
 			do p=1, 199
 			!avoid singularities
-				kz1tilde=SQRT(n1*eta^2 - kxtildearray(p)^2)
-				kz2tilde=SQRT(n2*eta^2 - kxtildearray(p)^2)
+				kz1tilde=SQRT(n1*eta**2 - kxtildearray(p)**2)
+				kz2tilde=SQRT(n2*eta**2 - kxtildearray(p)**2)
 
 				A=exp(i*kz1tilde*dsourcetilde)
 				C=exp(i*kz2tilde*dsourcetilde)
-				D=-(kz1tilde/mu1)*exp(i*kz1tilde*dsourcetilde)
+				D2=-(kz1tilde/mu1)*exp(i*kz1tilde*dsourcetilde)
 				F=-(kz2tilde/mu2)*exp(i*kz2tilde*dsourcetilde)
 
 				t=(D2**2 + A**2)/(D2*F + A*C2)
@@ -112,14 +112,14 @@ do m=0, ztildesize
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*((kxtildearray(p)*COS(thetai)-kz1tilde*SIN(thetai))**2)/2.0) &
 					 + (i*kxtildearray(p)*xtildearray(n)) + (i*kz1tilde*ztildearray(m))) &
-			 		 *kxprimestepfrac/COS(thetai))
+			 		 *kxtildestepfrac/COS(thetai))
 
 					Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + r*integral)
 				else
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*((kxtildearray(p)*COS(thetai)-kz2tilde*SIN(thetai))**2)/2.0) &
 					 + (i*kxtildearray(p)*xtildearray(n)) + (i*kz2tilde*ztildearray(m))) &
-			 		 *kxprimestepfrac/COS(thetai))
+			 		 *kxtildestepfrac/COS(thetai))
 
 					Eykspacearray(n,m) = Eykspacearray(n,m) + (t*integral)
 				end if

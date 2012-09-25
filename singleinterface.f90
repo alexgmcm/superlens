@@ -11,9 +11,10 @@ program singleinterface
 implicit none !doesn't assume types from names, must be declared explicitly
 
 ! Declare stuff here - check these are all necessary
-double precision :: x = 0.0, z = 0.0, thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde, kz2tilde
+double precision :: x = 0.0, z = 0.0, thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde!, kz2tilde
 double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, Eyout, PI, Eyout2, sigmatilde, temp, eps1, eps2, mu1, mu2, n1, n2
-complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, test, kc, integral, r, t, kz1tilde
+complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, test, kc, integral
+complex*16 :: r, t, kz1tilde, kx1prime, kx2prime, xprime, kz2tilde, zprime, kz1prime, kz2prime
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen !, SIZE
 character :: filename*80, ti*10
 double precision, dimension(:), allocatable :: xtildearray
@@ -100,6 +101,16 @@ do m=0, ztildesize
 				kz1tilde=SQRT(n1*eta**2 - kxtildearray(p)**2)
 				kz2tilde=SQRT(n2*eta**2 - kxtildearray(p)**2)
 
+				xprime=(-SIN(thetai)*ztildearray(m) + COS(thetai)*xtildearray(n))
+				zprime=(COS(thetai)*ztildearray(m) + SIN(thetai)*xtildearray(n))
+
+				kx1prime=(COS(thetai)*kxtildearray(p) - SIN(thetai)*kz1tilde)
+				kz1prime=(COS(thetai)*kz1tilde + SIN(thetai)*kxtildearray(p))
+
+				kx2prime=(COS(thetai)*kxtildearray(p) - SIN(thetai)*kz2tilde)
+				kz2prime=(COS(thetai)*kz2tilde + SIN(thetai)*kxtildearray(p))
+
+
 				A=exp(i*kz1tilde*dsourcetilde)
 				C=exp(i*kz2tilde*dsourcetilde)
 				D2=-(kz1tilde/mu1)*exp(i*kz1tilde*dsourcetilde)
@@ -110,15 +121,15 @@ do m=0, ztildesize
 
 				if(ztildearray(m) <= dsourcetilde) then
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*((kxtildearray(p)*COS(thetai)-kz1tilde*SIN(thetai))**2)/2.0) &
-					 + (i*kxtildearray(p)*xtildearray(n)) + (i*kz1tilde*ztildearray(m))) &
+					*(EXP( (-sigmatilde*((kx1prime)**2)/2.0) & !changed rotational terms to the primes instead of just using the direct tildes
+					 + (i* kx1prime * xprime  ) + (i*kz1prime*zprime)) &
 			 		 *kxtildestepfrac/COS(thetai))
 
 					Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + r*integral)
 				else
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*((kxtildearray(p)*COS(thetai)-kz2tilde*SIN(thetai))**2)/2.0) &
-					 + (i*kxtildearray(p)*xtildearray(n)) + (i*kz2tilde*ztildearray(m))) &
+					*(EXP( (-sigmatilde*((kx2prime)**2)/2.0) & !as above
+					 + (i*kx2prime*xprime) + (i*kz2prime*zprime)) &
 			 		 *kxtildestepfrac/COS(thetai))
 
 					Eykspacearray(n,m) = Eykspacearray(n,m) + (t*integral)

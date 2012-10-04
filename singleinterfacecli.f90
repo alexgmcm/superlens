@@ -1,19 +1,17 @@
-!singleinterface.f90
-! By: Alex McMurray 
+!singleinterfacecli.f90
 !
-! Derived from rotated frame, but adjusted back into nonrotated space
-! Consider only single interface will later expand to double interface (slab)
-! Consider only positive refraction (negative refraction has a backward wave)
-! This approach will differ from the congaussian code at high angles of incidence
-! These results should be compared once the slab is obtained.
+!Single interface code using rotated frame approach but translated
+!to normal frame.
+!Supports command line interface for variables and calls to MATLAB for plotting.
 
-program singleinterface
+
+!
 implicit none !doesn't assume types from names, must be declared explicitly
 
 ! Declare stuff here - check these are all necessary
-double precision :: x = 0.0, z = 0.0, thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde!, kz2tilde
-double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, Eyout, PI, Eyout2, sigmatilde, temp, eps1, eps2, mu1, mu2, n1, n2
-complex*16 :: Ey, Ie, Re, Ce, De, Te, kx, kz1, kz2, A, B, C2, D2, F, G2, H, I2, J, K, i, test, kc, integral
+double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde!, kz2tilde
+double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, sigmatilde, eps1, eps2, mu1, mu2, n1, n2
+complex*16 :: A, B, C2, D2, F, i, integral
 complex*16 :: r, t, kz1tilde, kx1prime, kx2prime, xprime, kz2tilde, zprime, kz1prime, kz2prime
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen !, SIZE
 character :: filename*80, ti*10
@@ -22,6 +20,10 @@ double precision, dimension(:), allocatable :: ztildearray
 complex*16, dimension(0:200) :: kxtildearray
 complex*16, dimension(:,:), allocatable :: Eyrealarray
 complex*16, dimension(:,:), allocatable :: Eykspacearray
+
+
+
+
 
 !The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
 ! i.e. xtilde = x/d etc.
@@ -33,14 +35,27 @@ xtildef=10
 ztildestepfrac=0.1
 xtildestepfrac=0.1
 
-dsourcetilde = 10
 !The distance from the source to the interface parametised by d (in zspace)
+dsourcetilde = 10
 
+!Parameters: use command line args in future http://web.utah.edu/thorne/computing/Handy_Fortran_Tricks.pdf
 
 eps1=1.0
 mu1=1.0
 eps2=5.0
 mu2=1.0
+ti = '0.16pi'
+
+thetai= PI/4.0 
+!angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
+
+
+PI=4.D0*DATAN(1.D0) 
+!ensures maximum precision on any architechture apparently
+
+
+
+
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
@@ -48,11 +63,8 @@ n2=SQRT(eps2*mu2)
 xtildesize = int(((xtildef-xtildei)/xtildestepfrac)) + 1
 ztildesize = int(((ztildef-ztildei)/ztildestepfrac)) + 1
 
-PI=4.D0*DATAN(1.D0) 
-!ensures maximum precision on any architechture apparently
 
-thetai= PI/4.0 
-!angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
+
 
 !allocate arrays with desired shape
 allocate(xtildearray(0:xtildesize))
@@ -76,7 +88,6 @@ sigmatilde = 1
 !sigma tilde is sigma/d^2 so it is dimensionless parameter
 
 
-ti = '0.16pi'
 tilen=LEN(TRIM(ti)) !this is just for filename purposes
 kxtildestepfrac = ((eta*COS(thetai))/100.0) !no 2pi term?
 
@@ -91,6 +102,7 @@ end do
 do p=0, 200
 	kxtildearray(p)= -(eta*SIN(PI/2.0)) + p*kxtildestepfrac !used to be 0+ 
 end do
+
 
 do m=0, ztildesize
 	do n=0, xtildesize
@@ -157,6 +169,6 @@ end do
 20 	format(A,A,A,f3.1,A,f3.1,A)
 
 
-end program singleinterface
+end program singleinterfacecli
 
-
+!

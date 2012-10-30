@@ -1,0 +1,22 @@
+Breakpoint 1, MAIN__ () at singleinterfacecliworking.f90:173
+173						Eykspacearray(n,m) = Eykspacearray(n,m) + (t*integral)
+(gdb) print t
+$1 = 0.14271309562318887 + -0.34484694891523754 * I
+(gdb) print r
+$2 = 0.16688592125308546 + 0.60416351070925145 * I
+(gdb) print integral
+$3 = -5.1082165659691856e-11 + -4.3446429924502143e-11 * I
+(gdb) 
+
+
+
+Breakpoint 1, MAIN__ () at singleinterfacecliworking.f90:158
+158						Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + r*integral2)
+(gdb) print t
+$1 = 0.14271309562318887 + -0.34484694891523754 * I
+(gdb) print r
+$2 = 0.16688592125308546 + 0.60416351070925145 * I
+(gdb) print integral 
+$3 = 6.7059525212074662e-11 + 0 * I
+(gdb) print integral2
+$4 = 4.204818438813006e-11 + 5.2239162620879486e-11 * I

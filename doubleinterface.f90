@@ -11,8 +11,8 @@ implicit none !doesn't assume types from names, must be declared explicitly
 
 ! Declare stuff here - check these are all necessary
 double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildeprimestepfrac, dsourcetilde
-double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, sigmatilde, eps1, eps2, mu1, mu2, n1, n2, etatest
-complex*16 :: A, B, C2, D, i, integral, integral2, chi
+double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, sigmatilde, eps1, mu1, mu2, etatest
+complex*16 :: A, B, C2, D, i, integral, integral2, chi, n1, n2, eps2
 complex*16 :: r, t, kztildeprime, kz1tilde,kz2tilde,kxtilde, Ce, De, rnumerator, rdenominator
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen
 character :: filename*80, ti*10
@@ -60,6 +60,11 @@ thetai= (45.0/180.0)*PI
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
+
+if ((RealPart(n2) < 0 .and. RealPart(eps2) > 0) .or. &
+ (RealPart(eps2) < 0 .and. mu2<0 .and. RealPart(n2) > 0 )) then
+	n2 = -1 * n2
+end if
 
 xtildesize = anint(((xtildef-xtildei)/xtildestepfrac))
 ztildesize = anint(((ztildef-ztildei)/ztildestepfrac))
@@ -120,6 +125,25 @@ do m=0, ztildesize
 
 				kz1tilde=sqrt(eta**2 - kxtilde**2)
 				kz2tilde=sqrt((n2*eta)**2 - kxtilde**2)
+
+
+
+				if (aimag(kz2tilde) < 0.0005) then
+					kz2tilde = real(kz2tilde)
+				end if
+
+				if (aimag(kz1tilde) < 0.0005) then
+					kz1tilde = real(kz1tilde)
+				end if
+
+				if ((RealPart(kz2tilde) > 0) .and. (RealPart(n2) < 0)) then
+					kz2tilde = -kz2tilde
+				end if
+
+				if (RealPart(kz1tilde) < 0) then
+					kz1tilde = -kz1tilde
+				end if
+
 
 				chi = (kz2tilde*mu1)/(kz1tilde*mu2)
 

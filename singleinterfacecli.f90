@@ -28,12 +28,12 @@ complex*16, dimension(:,:), allocatable :: Eykspacearray
 !The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
 ! i.e. xtilde = x/d etc.
 
-ztildei=0
-xtildei=-10
-ztildef=20
-xtildef=10
-ztildestepfrac=0.1
-xtildestepfrac=0.1
+ztildei=-100
+xtildei=-100
+ztildef=100
+xtildef=100
+ztildestepfrac=1
+xtildestepfrac=1
 
 !The distance from the source to the interface parametised by d (in zspace)
 dsourcetilde = 10
@@ -44,7 +44,7 @@ eps1=1.0
 mu1=1.0
 eps2=5.0
 mu2=1.0
-ti = '0.16pi'
+ti = '0.25pi'
 
 thetai= PI/4.0 
 !angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
@@ -60,8 +60,8 @@ PI=4.D0*DATAN(1.D0)
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
 
-xtildesize = int(((xtildef-xtildei)/xtildestepfrac)) + 1
-ztildesize = int(((ztildef-ztildei)/ztildestepfrac)) + 1
+xtildesize = int(((xtildef-xtildei)/xtildestepfrac)) !+ 1
+ztildesize = int(((ztildef-ztildei)/ztildestepfrac)) !+ 1
 
 
 
@@ -77,7 +77,7 @@ i = (0.0,1.0)
 !Can just use normal functions as modern fortran can determine the type required, 
 !specialist csqrt etc. are obsolete
 
-eta = 1 
+eta = 1.0 
 !go from 0.1 to 5, dimensionless parameter equal to omega*d/c
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
@@ -95,10 +95,11 @@ kxtildestepfrac = ((eta*COS(thetai))/100.0) !no 2pi term?
 do p=0, xtildesize
 	xtildearray(p)= xtildei + p*xtildestepfrac
 end do
-
+print*, "x=", xtildesize
 do p=0, ztildesize
 	ztildearray(p)= ztildei + p*ztildestepfrac
 end do
+print*, "z=" ,ztildesize
 do p=0, 200
 	kxtildearray(p)= -(eta*SIN(PI/2.0)) + p*kxtildestepfrac !used to be 0+ 
 end do
@@ -169,6 +170,6 @@ end do
 20 	format(A,A,A,f3.1,A,f3.1,A)
 
 
-end program singleinterfacecli
+end
 
 !

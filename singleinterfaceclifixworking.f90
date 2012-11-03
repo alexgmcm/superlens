@@ -1,4 +1,4 @@
-!singleinterfacecli.f90
+!singleinterfaceclifixworking.f90
 !Fixing major bug due to incorrect integral limits"
 !therefore change kxtilde for kxtildeprime in integral
 !Single interface code using rotated frame approach but translated
@@ -11,10 +11,10 @@ implicit none !doesn't assume types from names, must be declared explicitly
 
 ! Declare stuff here - check these are all necessary
 double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildeprimestepfrac, dsourcetilde
-double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, sigmatilde, eps1, eps2, mu1, mu2, n1, n2, etatest
-complex*16 :: A, B, C2, D2, F, i, integral, E2, integral2, chi
-complex*16 :: r, t, kztildeprime, kx1prime, kx2prime, xprime, kz2tildeprime, zprime, kz1prime, kz2prime, kz1tilde,kz2tilde,kxtilde
-integer*4 :: m, n, p, xtildesize, ztildesize,tilen !, SIZE
+double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, sigmatilde, eps1, mu1, mu2, etatest
+complex*16 :: A, B, C2, D2, F, i, integral, E2, integral2, chi, n1, n2, eps2
+complex*16 :: r, t, kztildeprime, kz1tilde,kz2tilde,kxtilde
+integer*4 :: m, n, p, xtildesize, ztildesize,tilen
 character :: filename*80, ti*10
 double precision, dimension(:), allocatable :: xtildearray
 double precision, dimension(:), allocatable :: ztildearray
@@ -45,7 +45,7 @@ eps1=1.0
 mu1=1.0
 eps2=10.0
 mu2=1.0
-ti = '0.25pi'
+ti = '45'
 
 
 !angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
@@ -53,13 +53,18 @@ ti = '0.25pi'
 
 PI=4.D0*DATAN(1.D0) 
 !ensures maximum precision on any architechture apparently
-thetai= (75.0/180.0)*PI 
+thetai= (45.0/180.0)*PI 
 
 
 
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
+
+if ((RealPart(n2) < 0 .and. RealPart(eps2) > 0) .or. &
+ (RealPart(eps2) < 0 .and. mu2<0 .and. RealPart(n2) > 0 )) then
+	n2 = -1 * n2
+end if
 
 xtildesize = anint(((xtildef-xtildei)/xtildestepfrac))
 ztildesize = anint(((ztildef-ztildei)/ztildestepfrac))
@@ -113,30 +118,32 @@ do m=0, ztildesize
 			do p=0, 200
 			!avoid singularities
 				kztildeprime=SQRT(eta**2 - kxtildeprimearray(p)**2)
-				!kztildeprime=SQRT((n2*eta)**2 - kxtildeprimearray(p)**2)
 
-
-				!From old attempt with rotated co-ords. Ignore.
-				!xprime=(-SIN(thetai)*ztildearray(m) + COS(thetai)*xtildearray(n))
-				!zprime=(COS(thetai)*ztildearray(m) + SIN(thetai)*xtildearray(n))
-				!kx1prime=(COS(thetai)*kxtildearray(p) - SIN(thetai)*kz1tilde)
-				!kz1prime=(COS(thetai)*kz1tilde + SIN(thetai)*kxtildearray(p))
-				!kx2prime=(COS(thetai)*kxtildearray(p) - SIN(thetai)*kz2tilde)
-				!kz2prime=(COS(thetai)*kz2tilde + SIN(thetai)*kxtildearray(p))
-				!A=exp(i*kz1tilde*dsourcetilde)
-				!B=exp(-i*kz1tilde*dsourcetilde)
-				!C=exp(i*kz2tilde*dsourcetilde)
-				!D2=(kz1tilde/mu1)*exp(i*kz1tilde*dsourcetilde)
-				!E2=(kz1tilde/mu1)*exp(-i*kz1tilde*dsourcetilde)
-				!F=(kz2tilde/mu2)*exp(i*kz2tilde*dsourcetilde)		
-				!r=(C2*D2 - F*A)/(B*F + C*E2)
-				!t=(D2/F)-((E2/F)*r)
 
 
 				kxtilde=kxtildeprimearray(p)*cos(thetai) + kztildeprime*sin(thetai)
 
 				kz1tilde=sqrt(eta**2 - kxtilde**2)
 				kz2tilde=sqrt((n2*eta)**2 - kxtilde**2)
+
+				if (aimag(kz2tilde) < 0.0005) then
+					kz2tilde = real(kz2tilde)
+				end if
+
+				if (aimag(kz1tilde) < 0.0005) then
+					kz1tilde = real(kz1tilde)
+				end if
+
+				if ((RealPart(kz2tilde) > 0) .and. (RealPart(n2) < 0)) then
+					kz2tilde = -kz2tilde
+				end if
+
+				if (RealPart(kz1tilde) < 0) then
+					kz1tilde = -kz1tilde
+				end if
+
+
+
 
 				chi = (kz2tilde*mu1)/(kz1tilde*mu2)
 				r=exp(2*i*kz1tilde*dsourcetilde)*((1-chi)/(1+chi))
@@ -186,7 +193,7 @@ do m=0, ztildesize
 	end do 
 end do
 
-write(filename,20) 'data/singint',ti(1:tilen),'rads',eta,'eta', sigmatilde,'sigmatilde.dat'
+write(filename,20) 'data/singint',ti(1:tilen),'degs',eta,'eta', sigmatilde,'sigmatilde.dat'
 open(unit=2,file= filename)
 	
 

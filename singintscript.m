@@ -1,27 +1,28 @@
 
-zi=0;
-xi=-10;
+zi=-20;
+xi=-20;
 zf=20;
-xf=10;
+xf=20;
 zstepfrac=0.1;
 xstepfrac=0.1;
-size=int32(((zf-zi)/(zstepfrac)+1));
-eta=1;
-eps2=5.0;
+size=ceil(((zf-zi)/(zstepfrac)))+1;
+sizex=ceil(((xf-xi)/(xstepfrac)))+1;
+eta=1.0;
+eps2=10.0;
 mu2=1.0;
-thetai='PI/4.0';
-dsource=10;
+thetai='45';
+dsource=1;
  
 g=[1.0];
 for x=1:1
 g(x) = round(g(x)*10^1)/(10^1);
 end
-sizesquare=int32(double(size)*double(size));
+sizesquare=ceil(double(size)*double(sizex));
 data=zeros(sizesquare, 4, 7);
 
 for x=1:1
 num2str(g(x), '%3.1f');
-data(:,:,x) = load('data/singint0.16pirads1.0eta1.0sigmatilde.dat');
+data(:,:,x) = load(strcat('data/singint',thetai,'degs','3.1eta4.0sigmatilde.dat'));
 end
 
 for x=1:1
@@ -32,13 +33,13 @@ jcount=0;
 
 
 
-eyarray=zeros(size,size);%this is the tranformed field modulus
-eyrparray=zeros(size,size);%this is the transformed field real part
+eyarray=zeros(sizex,size);%this is the tranformed field modulus
+eyrparray=zeros(sizex,size);%this is the transformed field real part
 xarray=[xi:(xstepfrac):xf];
 zarray=[zi:(zstepfrac):zf];
 
 
-while (i <= size)
+while (i <= sizex)
 	while (j<=size)
 		eyarray(i,j)=data((jcount* double(size) + j),3,x);
         eyrparray(i,j)=data((jcount* double(size) + j),4,x);
@@ -56,7 +57,7 @@ title(strcat('g=',num2str(g(1)),',thetai=',num2str(thetai),',mu1=1, mu2=',num2st
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng','plots/im_singint0.16pirads1.0eta1.0sigmatilde.png');
+print('-dpng',strcat('plots/im_singint',thetai,'degspieta4.0sigmatilde',num2str(eps2),'eps2.png'));
 
 
 k=imagesc(xarray,zarray,eyrparray);
@@ -66,5 +67,5 @@ title(strcat('real part: g=',num2str(g(1)),',thetai=',num2str(thetai),',mu1=1, m
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng','plots/real_singint0.16pirads1.0eta1.0sigmatilde.png');
+print('-dpng',strcat('plots/real_singint',thetai,'degspieta4.0sigmatilde',num2str(eps2),'eps2.png'));
 end

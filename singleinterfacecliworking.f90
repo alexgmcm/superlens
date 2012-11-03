@@ -11,7 +11,7 @@ implicit none !doesn't assume types from names, must be declared explicitly
 ! Declare stuff here - check these are all necessary
 double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde!, kz2tilde
 double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, sigmatilde, eps1, eps2, mu1, mu2, n1, n2
-complex*16 :: A, B, C2, D2, F, i, integral, E2, integral2
+complex*16 :: A, B, C2, D2, F, i, integral, E2, integral2, chi
 complex*16 :: r, t, kz1tilde, kx1prime, kx2prime, xprime, kz2tilde, zprime, kz1prime, kz2prime
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen !, SIZE
 character :: filename*80, ti*10
@@ -52,7 +52,7 @@ ti = '0.25pi'
 
 PI=4.D0*DATAN(1.D0) 
 !ensures maximum precision on any architechture apparently
-thetai= PI/4.0 
+thetai= (8.0/18.0)*PI 
 
 
 
@@ -83,13 +83,13 @@ eta = PI
 ! w and d and lambda are all replaced by eta
 
 
-sigmatilde = 4
+sigmatilde = 4.0
 !sigma is form of gaussian beamwidth parameter, here taken to be the squared value, dimensions of area
 !sigma tilde is sigma/d^2 so it is dimensionless parameter
 
 
 tilen=LEN(TRIM(ti)) !this is just for filename purposes
-kxtildestepfrac = ((eta*COS(thetai))/100.0) !no 2pi term?
+kxtildestepfrac = ((eta*COS(thetai))/100.0) 
 
 
 do p=0, xtildesize
@@ -114,55 +114,57 @@ do m=0, ztildesize
 				kz1tilde=SQRT((n1*eta)**2 - kxtildearray(p)**2)
 				kz2tilde=SQRT((n2*eta)**2 - kxtildearray(p)**2)
 
-				if (p=200) then
-					print*, "kz1tilde= ", kz1tilde, " kz2tilde= ", kz2tilde
-				end if
-				!From old attempt with rotated co-ords. Ignore.
 
+				!From old attempt with rotated co-ords. Ignore.
 				!xprime=(-SIN(thetai)*ztildearray(m) + COS(thetai)*xtildearray(n))
 				!zprime=(COS(thetai)*ztildearray(m) + SIN(thetai)*xtildearray(n))
-
 				!kx1prime=(COS(thetai)*kxtildearray(p) - SIN(thetai)*kz1tilde)
 				!kz1prime=(COS(thetai)*kz1tilde + SIN(thetai)*kxtildearray(p))
-
 				!kx2prime=(COS(thetai)*kxtildearray(p) - SIN(thetai)*kz2tilde)
 				!kz2prime=(COS(thetai)*kz2tilde + SIN(thetai)*kxtildearray(p))
+				!A=exp(i*kz1tilde*dsourcetilde)
+				!B=exp(-i*kz1tilde*dsourcetilde)
+				!C=exp(i*kz2tilde*dsourcetilde)
+				!D2=(kz1tilde/mu1)*exp(i*kz1tilde*dsourcetilde)
+				!E2=(kz1tilde/mu1)*exp(-i*kz1tilde*dsourcetilde)
+				!F=(kz2tilde/mu2)*exp(i*kz2tilde*dsourcetilde)		
+				!r=(C2*D2 - F*A)/(B*F + C*E2)
+				!t=(D2/F)-((E2/F)*r)
 
 
-				A=exp(i*kz1tilde*dsourcetilde)
-				B=exp(-i*kz1tilde*dsourcetilde)
-				C=exp(i*kz2tilde*dsourcetilde)
-				D2=(kz1tilde/mu1)*exp(i*kz1tilde*dsourcetilde)
-				E2=(kz1tilde/mu1)*exp(-i*kz1tilde*dsourcetilde)
-				F=(kz2tilde/mu2)*exp(i*kz2tilde*dsourcetilde)
-
-				
-				r=(C2*D2 - F*A)/(B*F + C*E2)
-				t=(D2/F)-((E2/F)*r)
+				chi = (kz2tilde*mu1)/(kz1tilde*mu2)
+				r=exp(2*i*kz1tilde*dsourcetilde)*((1-chi)/(1+chi))
+				t=exp(i*(kz1tilde-kz2tilde)*dsourcetilde)*2/(1+chi)
 
 				if(ztildearray(m) <= dsourcetilde) then
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*((kxtildearray(p)*cos(thetai) - kz1tilde*sin(thetai) )**2)/2.0) & 
-					 + (i* kxtildearray(p) * xtildearray(n)  ) + (i*kz1tilde*ztildearray(m) ) ) & !should the (kxtildearray(p))**2 part be kx1prime**2 ???
+					 + (i* kxtildearray(p) * xtildearray(n)  ) + (i*kz1tilde*ztildearray(m) ) ) & 
 			 		 *kxtildestepfrac/COS(thetai))
 
 					integral2= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*((kxtildearray(p)*cos(thetai) - kz1tilde*sin(thetai) )**2)/2.0) & 
-					 + (i* kxtildearray(p) * xtildearray(n)  ) + (-i*kz1tilde*ztildearray(m) ) ) & !should the (kxtildearray(p))**2 part be kx1prime**2 ???
+					 + (i* kxtildearray(p) * xtildearray(n)  ) + (-i*kz1tilde*ztildearray(m) ) ) &
 			 		 *kxtildestepfrac/COS(thetai))
 
 
 					Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + r*integral2)
-					
+					if(m==0 .and. n==0) then
+						print*, "conserved= ",cdabs(r)**2+(kz2tilde/kz1tilde)*(cdabs(t)**2)
+					end if
 
 				else
+
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( (kxtildearray(p)*cos(thetai) - kz2tilde*sin(thetai) )**2)/2.0) & !as above
-					 + (i*kxtildearray(p)*xtildearray(n)) + (i*kz2tilde*ztildearray(m) ) )) &
+					*(EXP( (-sigmatilde*((kxtildearray(p)*cos(thetai) - kz1tilde*sin(thetai) )**2)/2.0) & 
+					 + (i* kxtildearray(p) * xtildearray(n)  ) + (i*kz2tilde*ztildearray(m) ) ) & 
 			 		 *kxtildestepfrac/COS(thetai))
 
-					Eykspacearray(n,m) = Eykspacearray(n,m) + (t*integral)
 
+					Eykspacearray(n,m) = Eykspacearray(n,m) + (t*integral)
+					if(m==0 .and. n==0) then
+						print*, " conserved= ",( cdabs(r)**2+(kz2tilde/kz1tilde)*(cdabs(t)**2) )
+					end if
 					
 
 				end if

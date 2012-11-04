@@ -45,15 +45,16 @@ eps1=1.0
 mu1=1.0
 eps2=10.0
 mu2=1.0
-ti = '45'
+ti = '30' !also change thetai
 
-
+!Remember negative refraction is when BOTH eps2 AND mu2 are negative, not just eps2!!!
+!change thetai AND ti
 !angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
 
 
 PI=4.D0*DATAN(1.D0) 
 !ensures maximum precision on any architechture apparently
-thetai= (45.0/180.0)*PI 
+thetai= (30.0/180.0)*PI !also change ti
 
 
 
@@ -162,7 +163,10 @@ do m=0, ztildesize
 				De=(2*(chi - 1)*A*(B**(-1))) / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) )
 				t=(chi/D)*( (4*A* (B**(-1)) *(C2**(-1)))  / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) ) )		
 
-
+					!if(m==0 .and. n==0) then
+						!print*, "n1= ",n1," n2= ",n2," kz1tilde= ", kz1tilde," kz2tilde= ",kz2tilde
+						!print*, " kxtilde= ", kxtilde, " r= ", r, " t= ", t, " ce= ",Ce," de= ", De 
+					!end if
 
 				etatest=eta**2-kxtilde**2
 

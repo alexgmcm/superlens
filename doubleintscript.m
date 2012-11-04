@@ -7,10 +7,10 @@ zstepfrac=0.1;
 xstepfrac=0.1;
 size=ceil(((zf-zi)/(zstepfrac)))+1;
 sizex=ceil(((xf-xi)/(xstepfrac)))+1;
-eta=1.0;
+eta='pi';
 eps2=10.0;
 mu2=1.0;
-thetai='45';
+thetai='30';
 dsource=1;
  
 g=[1.0];
@@ -53,7 +53,7 @@ end
 k=imagesc(xarray,zarray,eyarray);
 xlabel('x/lambda');
 ylabel('z/lambda');
-title(strcat('g=',num2str(g(1)),',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',num2str(eta) ));
+title(strcat('g=',num2str(g(1)),',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta ));
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[11*dsource 11*dsource],'linewidth',4,'Color', 'k');
@@ -64,7 +64,7 @@ print('-dpng',strcat('plots/im_doubint',thetai,'degspieta4.0sigmatilde',num2str(
 k=imagesc(xarray,zarray,eyrparray);
 xlabel('x/lambda');
 ylabel('z/lambda');
-title(strcat('real part: g=',num2str(g(1)),',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',num2str(eta) ));
+title(strcat('real part: g=',num2str(g(1)),',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta ));
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[11*dsource 11*dsource],'linewidth',4,'Color', 'k');

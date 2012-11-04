@@ -43,17 +43,17 @@ dsourcetilde = 1
 
 eps1=1.0
 mu1=1.0
-eps2=10.0
-mu2=1.0
-ti = '45'
-
-
+eps2=-1.0
+mu2=-1.0
+ti = '60' ! also change thetai
+!Remember negative refraction is when BOTH eps2 AND mu2 are negative, not just eps2!!!
+!Change both ti and thetai!!
 !angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
 
 
 PI=4.D0*DATAN(1.D0) 
 !ensures maximum precision on any architechture apparently
-thetai= (45.0/180.0)*PI 
+thetai= (60.0/180.0)*PI !also change ti
 
 
 
@@ -150,6 +150,9 @@ do m=0, ztildesize
 				t=exp(i*(kz1tilde-kz2tilde)*dsourcetilde)*2/(1+chi)
 				etatest=eta**2-kxtilde**2
 
+
+
+
 				if(ztildearray(m) <= dsourcetilde) then
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*((kxtilde*cos(thetai) - kz1tilde*sin(thetai) )**2)/2.0) & 
@@ -163,9 +166,7 @@ do m=0, ztildesize
 
 
 					Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + r*integral2)
-					if(m==0 .and. n==0) then
-						!print*, "conserved= ",cdabs(r)**2+(kz2tilde/kz1tilde)*(cdabs(t)**2)
-					end if
+					
 
 				else
 

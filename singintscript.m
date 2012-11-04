@@ -7,10 +7,10 @@ zstepfrac=0.1;
 xstepfrac=0.1;
 size=ceil(((zf-zi)/(zstepfrac)))+1;
 sizex=ceil(((xf-xi)/(xstepfrac)))+1;
-eta=1.0;
-eps2=10.0;
-mu2=1.0;
-thetai='45';
+eta='pi';
+eps2=-1.0;
+mu2=-1.0;
+thetai='60';
 dsource=1;
  
 g=[1.0];

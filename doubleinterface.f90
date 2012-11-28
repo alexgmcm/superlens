@@ -43,9 +43,9 @@ dsourcetilde = 1
 
 eps1=1.0
 mu1=1.0
-eps2=10.0
-mu2=1.0
-ti = '30' !also change thetai
+eps2=-1.5
+mu2=-1.5
+ti = '45' !also change thetai
 
 !Remember negative refraction is when BOTH eps2 AND mu2 are negative, not just eps2!!!
 !change thetai AND ti
@@ -54,7 +54,7 @@ ti = '30' !also change thetai
 
 PI=4.D0*DATAN(1.D0) 
 !ensures maximum precision on any architechture apparently
-thetai= (30.0/180.0)*PI !also change ti
+thetai= (45.0/180.0)*PI !also change ti
 
 
 

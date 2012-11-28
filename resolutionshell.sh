@@ -1,20 +1,21 @@
 #!/bin/sh
 
-seq 60 5 90 > maxthetalist.txt
-seq 4.5 0.5 10.0 > secondinterfacelist.txt
+seq 90 -10 10 > maxthetalist.txt
+seq 3.0 1.0 3.0 > secondinterfacelist.txt
 
 
-while read maxtheta
-do
-	echo "$maxtheta"
-while read secint           
-do   
-	echo "$secint"        
-   ./test.out $secint $maxtheta
-   ./matlab_batcher.sh resolutionsuperlenscliscript $secint $maxtheta
-               
+while read secint
+	do
+	echo "$secint"
+	while read maxtheta           
+		do   
+		echo "$maxtheta"        
+		./test.out $secint $maxtheta
+		./matlab_batcher3.sh resolutionsuperlenscliscript $secint $maxtheta
+
+	done <maxthetalist.txt
+	./matlab_batcher.sh resolutionplotscliscript $secint
 done <secondinterfacelist.txt
-done <maxthetalist.txt
 
 
 

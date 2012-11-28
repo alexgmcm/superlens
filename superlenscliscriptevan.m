@@ -1,4 +1,4 @@
-function superlenscliscriptevan(g)
+function superlenscliscriptevan(secondinterface)
 
 zi=-20;
 xi=-20;
@@ -9,13 +9,13 @@ xstepfrac=0.1;
 size=ceil(((zf-zi)/(zstepfrac)))+1;
 sizex=ceil(((xf-xi)/(xstepfrac)))+1;
 eta='pi';
-eps2=10.0;
-mu2=1.0;
-thetai='75';
+eps2=-1;
+mu2=-1;
+thetai='0';
 dsource=1;
-secondinterface=3*dsource;
+%secondinterface=3*dsource;
  
-%g=[1.0];
+g=0.01
 %for x=1:1
 %g(x) = round(g(x)*10^1)/(10^1);
 %end
@@ -53,23 +53,23 @@ while (i <= sizex)
 end
 
 k=imagesc(xarray,zarray,eyarray);
-xlabel('x/lambda');
-ylabel('z/lambda');
+xlabel('x/dsource');
+ylabel('z/dsource');
 title(strcat('g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta ));
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[secondinterface secondinterface],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng',strcat('plots/im_doubint',thetai,'degspieta',gs,'sigmatilde',num2str(eps2),'eps2.png'));
+print('-dpng',strcat('plots/im_doubint',thetai,'degspieta',gs,'sigmatilde',num2str(eps2),'eps2',num2str(secondinterface),'secint.png'));
 
 
 k=imagesc(xarray,zarray,eyrparray);
-xlabel('x/lambda');
-ylabel('z/lambda');
+xlabel('x/dsource');
+ylabel('z/dsource');
 title(strcat('real part: g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta ));
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[secondinterface secondinterface],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng',strcat('plots/real_doubint',thetai,'degspieta',gs,'sigmatilde',num2str(eps2),'eps2.png'));
+print('-dpng',strcat('plots/real_doubint',thetai,'degspieta',gs,'sigmatilde',num2str(eps2),'eps2',num2str(secondinterface),'secint.png'));
 end

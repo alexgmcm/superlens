@@ -4,8 +4,8 @@ double precision :: x = 0.0, z = 0.0, thetai, eta, xstepfrac, zstepfrac
 double precision :: xi, zi, c=300000000, xf, zf, Eyout, PI, Eyout2, eps1, eps2, mu1, mu2, kx
 complex*16 :: Ey, Re, Te, kz1, kz2, i, n1, n2, test, chi
 integer :: m, n, p !, SIZE
-character :: filename*80
-
+character :: filename*80, cmd*50
+!CLI: ./test.out KXVAL
 PI=4.D0*DATAN(1.D0) ! ensures maximum precision on any architechture apparently
 i = (0.0,1.0)
 eta = PI
@@ -15,7 +15,8 @@ mu1=1
 eps2=10
 mu2=1
 
-
+CALL GETARG(1,cmd)
+READ(UNIT=cmd, FMT=*) kx
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
@@ -25,16 +26,16 @@ if (RealPart(n2) < 0) then
 end if
 
 
-zi=-5
-xi=-5
+zi=0
+xi=0
 
-zf=5
-xf=5
+zf=3
+xf=3
 
-zstepfrac=0.1
-xstepfrac=0.1 
+zstepfrac=0.01
+xstepfrac=0.01 
 
-kx=1.5
+!kx=1.5
 
 kz2 = SQRT((n2*(eta))**2 - kx**2)
 kz1 = SQRT((n1*(eta))**2 - kx**2)

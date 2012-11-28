@@ -43,16 +43,19 @@ xtildestepfrac=0.1
 !The distance from the source to the interface parametised by d (in zspace)
 dsourcetilde = 1
 
+!All distances are essentially in terms of dsourcetilde, however they will simply be given as numbers
+!as this makes passing them as commmand line arguments far far easier (and is equivalent as dsourcetilde=1)
+
 !position of second interface
-secondinterface = 3*dsourcetilde
+!secondinterface = 3*dsourcetilde
 
 !Parameters: use command line args in future http://web.utah.edu/thorne/computing/Handy_Fortran_Tricks.pdf
 
 eps1=1.0
 mu1=1.0
-eps2=10.0
-mu2=1.0
-ti = '75' !also change thetai
+eps2=-1.0
+mu2=-1.0
+ti = '0' !also change thetai
 
 !Remember negative refraction is when BOTH eps2 AND mu2 are negative, not just eps2!!!
 !change thetai AND ti
@@ -62,7 +65,7 @@ ti = '75' !also change thetai
 PI=4.D0*DATAN(1.D0) 
 !ensures maximum precision on any architechture apparently
 smallval = 0.1
-thetai= (75/180.0)*PI !also change ti
+thetai= (smallval/180.0)*PI !also change ti
 
 
 
@@ -97,14 +100,14 @@ eta = PI
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
 
-
+sigmatilde=0.01
 CALL GETARG(1,cmd)
-READ(UNIT=cmd, FMT=*) sigmatilde
+READ(UNIT=cmd, FMT=*) secondinterface
 !CALL VALUE(cmd, sigmatilde, errflag) 
 !print*, "errflag=", errflag
 !sigma is form of gaussian beamwidth parameter, here taken to be the squared value, dimensions of area
 !sigma tilde is sigma/d^2 so it is dimensionless parameter
-print*, "sigmatilde=", sigmatilde
+print*, "secondinterface=", secondinterface
 
 tilen=LEN(TRIM(ti)) !this is just for filename purposes
 kxtildeprimestepfrac = ((1*eta)/100.0) 
@@ -119,7 +122,7 @@ do p=0, ztildesize
 end do
 !print*, "z=" ,ztildesize," ", ztildearray(0)
 do p=0, 200
-	kxtildeprimearray(p)= -(1*eta) + p*kxtildeprimestepfrac !used to be 0+ 
+	kxtildeprimearray(p)= -(1*eta) + p*kxtildeprimestepfrac !>1*eta corresponds to including dark modes 
 end do
 
 
@@ -140,22 +143,40 @@ do m=0, ztildesize
 
 
 
-				if (aimag(kz2tilde) < 0.0005) then
-					kz2tilde = real(kz2tilde)
-				end if
+				!if (aimag(kz2tilde) < 0.0005) then
+				!	kz2tilde = real(kz2tilde)
+				!end if
 
-				if (aimag(kz1tilde) < 0.0005) then
-					kz1tilde = real(kz1tilde)
-				end if
+				!if (aimag(kz1tilde) < 0.0005) then
+				!	kz1tilde = real(kz1tilde)
+				!end if
 
-				if ((RealPart(kz2tilde) > 0) .and. (RealPart(n2) < 0)) then
-					kz2tilde = -kz2tilde
-				end if
+				!if ((RealPart(kz2tilde) > 0) .and. (RealPart(n2) < 0)) then
+				!	kz2tilde = -kz2tilde
+				!end if
 
-				if (RealPart(kz1tilde) < 0) then
-					kz1tilde = -kz1tilde
-				end if
+				!if (RealPart(kz1tilde) < 0) then
+				!	kz1tilde = -kz1tilde
+				!end if
 				!print*, "kx= ", kxtilde, " kz1= ", kz1tilde, " kz2= ", kz2tilde
+
+
+				if (aimag(kz2tilde)<0) then
+					kz2tilde = cmplx(-real(kz2tilde), -aimag(kz2tilde))
+
+				end if
+
+				if (aimag(kz1tilde)<0) then
+					kz1tilde = cmplx(-real(kz1tilde), -aimag(kz1tilde))
+				end if
+
+				if (aimag(kxtilde)<0) then
+					kxtilde = cmplx(-real(kxtilde), -aimag(kxtilde))
+				end if
+
+
+
+
 
 				chi = (kz2tilde*mu1)/(kz1tilde*mu2)
 

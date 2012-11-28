@@ -16,14 +16,17 @@ implicit none !doesn't assume types from names, must be declared explicitly
 ! Declare stuff here - check these are all necessary
 double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildeprimestepfrac, dsourcetilde, secondinterface
 double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, eps1, mu1, mu2, etatest, sigmatilde, smallval, thetamax 
-double precision :: thetamaxrad
+double precision :: thetamaxrad, cutkxtildeprimestepfrac
 complex*16 :: A, B, C2, D, i, integral, integral2, chi, n1, n2, eps2
 complex*16 :: r, t, kztildeprime, kz1tilde,kz2tilde,kxtilde, Ce, De, rnumerator, rdenominator
+complex*16 :: cutkztildeprime, cutkxtilde, cutkz1tilde, cutkz2tilde, cutchi, cutA, cutB, cutC2, cutD, cutrnumerator, cutrdenominator
+complex*16 :: cutCe, cutDe, cutt, cutr
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag
 character :: filename*150, ti*10, cmd1*50, cmd2*50 
 double precision, dimension(:), allocatable :: xtildearray
 double precision, dimension(:), allocatable :: ztildearray
 complex*16, dimension(0:200) :: kxtildeprimearray
+complex*16, dimension(0:200) :: cutkxtildeprimearray
 complex*16, dimension(:,:), allocatable :: Eyrealarray
 complex*16, dimension(:,:), allocatable :: Eykspacearray
 
@@ -34,12 +37,12 @@ complex*16, dimension(:,:), allocatable :: Eykspacearray
 !The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
 ! i.e. xtilde = x/d etc.
 
-ztildei=-20
-xtildei=-20
-ztildef=20
-xtildef=20
+ztildei=-5
+xtildei=-10
+ztildef=15
+xtildef=10
 ztildestepfrac=0.1
-xtildestepfrac=0.1
+xtildestepfrac=0.01
 
 !The distance from the source to the interface parametised by d (in zspace)
 dsourcetilde = 1
@@ -70,6 +73,7 @@ thetai= (smallval/180.0)*PI !also change ti
 
 CALL GETARG(2,cmd2)
 READ(UNIT=cmd2, FMT=*) thetamax
+print*, "thetamax=", thetamax
 thetamaxrad = (thetamax/180.0)*PI
 
 
@@ -104,7 +108,7 @@ eta = PI
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
 
-sigmatilde=0.01
+sigmatilde=0.001
 CALL GETARG(1,cmd1)
 READ(UNIT=cmd1, FMT=*) secondinterface
 !CALL VALUE(cmd, sigmatilde, errflag) 
@@ -114,8 +118,8 @@ READ(UNIT=cmd1, FMT=*) secondinterface
 print*, "secondinterface=", secondinterface
 
 tilen=LEN(TRIM(ti)) !this is just for filename purposes
-kxtildeprimestepfrac = ((1*eta*SIN(thetamaxrad))/100.0) 
-
+cutkxtildeprimestepfrac = ((1*eta*SIN(thetamaxrad))/100.0) 
+kxtildeprimestepfrac = ((1*eta)/100.0)
 
 do p=0, xtildesize
 	xtildearray(p)= xtildei + p*xtildestepfrac
@@ -126,7 +130,8 @@ do p=0, ztildesize
 end do
 !print*, "z=" ,ztildesize," ", ztildearray(0)
 do p=0, 200
-	kxtildeprimearray(p)= -(1*eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !>1*eta corresponds to including dark modes 
+	kxtildeprimearray(p)= -(1*eta) + p*kxtildeprimestepfrac
+	cutkxtildeprimearray(p)= -(1*eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !>1*eta corresponds to including dark modes 
 end do
 
 
@@ -137,33 +142,17 @@ do m=0, ztildesize
 			do p=0, 200
 			!avoid singularities
 				kztildeprime=SQRT(eta**2 - kxtildeprimearray(p)**2)
-
+				cutkztildeprime=SQRT(eta**2 - cutkxtildeprimearray(p)**2)
 
 
 				kxtilde=kxtildeprimearray(p)*cos(thetai) + kztildeprime*sin(thetai)
+				cutkxtilde=cutkxtildeprimearray(p)*cos(thetai) + cutkztildeprime*sin(thetai)
 
 				kz1tilde=sqrt(eta**2 - kxtilde**2)
+				cutkz1tilde=sqrt(eta**2 - cutkxtilde**2)
+
 				kz2tilde=sqrt((n2*eta)**2 - kxtilde**2)
-
-
-
-				!if (aimag(kz2tilde) < 0.0005) then
-				!	kz2tilde = real(kz2tilde)
-				!end if
-
-				!if (aimag(kz1tilde) < 0.0005) then
-				!	kz1tilde = real(kz1tilde)
-				!end if
-
-				!if ((RealPart(kz2tilde) > 0) .and. (RealPart(n2) < 0)) then
-				!	kz2tilde = -kz2tilde
-				!end if
-
-				!if (RealPart(kz1tilde) < 0) then
-				!	kz1tilde = -kz1tilde
-				!end if
-				!print*, "kx= ", kxtilde, " kz1= ", kz1tilde, " kz2= ", kz2tilde
-
+				cutkz2tilde=sqrt((n2*eta)**2 - cutkxtilde**2)
 
 				if (aimag(kz2tilde)<0) then
 					kz2tilde = cmplx(-real(kz2tilde), -aimag(kz2tilde))
@@ -179,11 +168,22 @@ do m=0, ztildesize
 				end if
 
 
+				if (aimag(cutkz2tilde)<0) then
+					cutkz2tilde = cmplx(-real(cutkz2tilde), -aimag(cutkz2tilde))
+
+				end if
+
+				if (aimag(cutkz1tilde)<0) then
+					cutkz1tilde = cmplx(-real(cutkz1tilde), -aimag(cutkz1tilde))
+				end if
+
+				if (aimag(cutkxtilde)<0) then
+					cutkxtilde = cmplx(-real(cutkxtilde), -aimag(cutkxtilde))
+				end if
 
 
 
 				chi = (kz2tilde*mu1)/(kz1tilde*mu2)
-
 				A=exp(i*kz1tilde*dsourcetilde)
 				B=exp(i*kz2tilde*dsourcetilde)
 				C2=exp(i*kz2tilde*secondinterface)
@@ -191,18 +191,33 @@ do m=0, ztildesize
 				rnumerator=  ( 2*( ((chi + 1)* (C2**(-2))) + ((chi - 1)*(B**(-2))) ) )
 				rdenominator= ( (((chi + 1)**2)*(C2**(-2))) - (((chi - 1)**2)*(B**(-2))) ) 
 				r=  (rnumerator/rdenominator)  - 1
-				if (chi==1) then
-					!r=0
-				end if 
+				
+
 
 				Ce= (2*A * (B**(-1)) * (C2**(-2)) * (chi + 1) ) / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) ) 	
 				De=(2*(chi - 1)*A*(B**(-1))) / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) )
 				t=(chi/D)*( (4*A* (B**(-1)) *(C2**(-1)))  / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) ) )		
 
-					!if(m==0 .and. n==0) then
-						!print*, "n1= ",n1," n2= ",n2," kz1tilde= ", kz1tilde," kz2tilde= ",kz2tilde
-						!print*, " kxtilde= ", kxtilde, " r= ", r, " t= ", t, " ce= ",Ce," de= ", De 
-					!end if
+
+
+				cutchi = (cutkz2tilde*mu1)/(cutkz1tilde*mu2)
+				cutA=exp(i*cutkz1tilde*dsourcetilde)
+				cutB=exp(i*cutkz2tilde*dsourcetilde)
+				cutC2=exp(i*cutkz2tilde*secondinterface)
+				cutD=exp(i*cutkz1tilde*secondinterface)
+				cutrnumerator=  ( 2*( ((cutchi + 1)* (cutC2**(-2))) + ((cutchi - 1)*(cutB**(-2))) ) )
+				cutrdenominator= ( (((cutchi + 1)**2)*(cutC2**(-2))) - (((cutchi - 1)**2)*(cutB**(-2))) ) 
+				cutr=  (cutrnumerator/cutrdenominator)  - 1
+				
+
+
+				cutCe= (2*cutA * (cutB**(-1)) * (cutC2**(-2)) * (cutchi + 1) ) & 
+					/ ( (((cutchi + 1)**2)*(cutC2**(-2)))  - (((cutchi - 1)**2)*(cutB**(-2))) ) 	
+				cutDe=(2*(cutchi - 1)*cutA*(cutB**(-1))) / ( (((cutchi + 1)**2)*(cutC2**(-2))) - (((cutchi - 1)**2)*(cutB**(-2))))
+				cutt=(cutchi/cutD)*( (4*cutA* (cutB**(-1)) *(cutC2**(-1))) &
+					 / ( (((cutchi + 1)**2)*(cutC2**(-2)))  - (((cutchi - 1)**2)*(cutB**(-2))) ) )	
+
+
 
 				etatest=eta**2-kxtilde**2
 
@@ -213,12 +228,12 @@ do m=0, ztildesize
 			 		 *kxtildeprimestepfrac)
 
 					integral2= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprimearray(p) )**2)/2.0) & 
-					 + (i* kxtilde * xtildearray(n)  ) + (-i*kz1tilde*ztildearray(m) ) ) &
-			 		 *kxtildeprimestepfrac)
+					*(EXP( (-sigmatilde*(( cutkxtildeprimearray(p) )**2)/2.0) & 
+					 + (i* cutkxtilde * xtildearray(n)  ) + (-i*cutkz1tilde*ztildearray(m) ) ) &
+			 		 *cutkxtildeprimestepfrac)
 
 
-					Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + r*integral2)
+					Eykspacearray(n,m) = Eykspacearray(n,m) + (integral + cutr*integral2)
 					if(m==0 .and. n==0) then
 						!print*, "conserved= ",cdabs(r)**2+(kz2tilde/kz1tilde)*(cdabs(t)**2)
 					end if
@@ -226,29 +241,29 @@ do m=0, ztildesize
 				elseif ( ztildearray(m) <= (secondinterface) ) then
 
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprimearray(p) )**2)/2.0) & 
-					 + (i* kxtilde * xtildearray(n)  ) + (i*kz2tilde*ztildearray(m) ) ) & 
-			 		 *kxtildeprimestepfrac)
+					*(EXP( (-sigmatilde*(( cutkxtildeprimearray(p) )**2)/2.0) & 
+					 + (i* cutkxtilde * xtildearray(n)  ) + (i*cutkz2tilde*ztildearray(m) ) ) & 
+			 		 *cutkxtildeprimestepfrac)
 
 					integral2= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprimearray(p) )**2)/2.0) & 
-					 + (i* kxtilde * xtildearray(n)  ) + (-i*kz2tilde*ztildearray(m) ) ) &
-			 		 *kxtildeprimestepfrac)
+					*(EXP( (-sigmatilde*(( cutkxtildeprimearray(p) )**2)/2.0) & 
+					 + (i* cutkxtilde * xtildearray(n)  ) + (-i*cutkz2tilde*ztildearray(m) ) ) &
+			 		 *cutkxtildeprimestepfrac)
 
 
-					Eykspacearray(n,m) = Eykspacearray(n,m) + (Ce*integral + De*integral2)
+					Eykspacearray(n,m) = Eykspacearray(n,m) + (cutCe*integral + cutDe*integral2)
 	
 
 
 				else
 
 					integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprimearray(p) )**2)/2.0) & 
-					 + (i* kxtilde* xtildearray(n)  ) + (i*kz1tilde*ztildearray(m) ) ) & 
-			 		 *kxtildeprimestepfrac)
+					*(EXP( (-sigmatilde*(( cutkxtildeprimearray(p) )**2)/2.0) & 
+					 + (i* cutkxtilde* xtildearray(n)  ) + (i*cutkz1tilde*ztildearray(m) ) ) & 
+			 		 *cutkxtildeprimestepfrac)
 
 
-					Eykspacearray(n,m) = Eykspacearray(n,m) + (t*integral)
+					Eykspacearray(n,m) = Eykspacearray(n,m) + (cutt*integral)
 					if(m==0 .and. n==0) then
 						!print*, " conserved= ",( cdabs(r)**2+(kz2tilde/kz1tilde)*(cdabs(t)**2) )
 					end if
@@ -277,7 +292,7 @@ do m=0, ztildesize
 	end do
 end do
 10	format(4e15.5,4e15.5,4e15.5,4e15.5)
-20 	format(A,f4.1,A,f3.1,A,f3.1,A,f3.1,A)
+20 	format(A,f4.1,A,f3.1,A,f5.3,A,f3.1,A)
 
 !cmd='./matlab_batcher.sh superlenscliscript ', sigmatilde
 !write (cmd, "(A39,I2)") "hello", 10

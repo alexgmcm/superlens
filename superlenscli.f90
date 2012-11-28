@@ -1,4 +1,4 @@
-!doubleinterface.f90
+!superlenscli.f90
 !Fixing major bug due to incorrect integral limits"
 !therefore change kxtilde for kxtildeprime in integral
 !Single interface code using rotated frame approach but translated

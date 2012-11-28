@@ -1,5 +1,5 @@
 #!/bin/sh
-seq 4.0 0.5 4.0 > list.txt
+seq 4.5 0.5 10.0 > list.txt
 
 while read line           
 do   

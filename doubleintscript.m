@@ -8,9 +8,9 @@ xstepfrac=0.1;
 size=ceil(((zf-zi)/(zstepfrac)))+1;
 sizex=ceil(((xf-xi)/(xstepfrac)))+1;
 eta='pi';
-eps2=10.0;
-mu2=1.0;
-thetai='30';
+eps2=-1.5;
+mu2=-1.5;
+thetai='45';
 dsource=1;
  
 g=[1.0];

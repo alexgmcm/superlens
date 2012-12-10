@@ -86,14 +86,16 @@ zimagepos=zarray(zsecondinterface+imageindex-1);
 slabthickness=secondinterface-dsource;
 
 ximageaxis=eyarray(zsecondinterface+imageindex,:);
+xsourceaxis=eyarray(zzeroindex,:);
 
 plot(xarray,ximageaxis,'-r');
 title(strcat('Intensity profile (EE*) at image, thetamax: ', num2str(thetamax),' degs'));
 xlabel('x ,d_s');
 ylabel('Intensity (EE*)');
+%ylim([0 7e-03])
 print('-dpng',strcat('plots/imageprofile',num2str(thetamax),'degsthetamax.png'));
 
-xsourceaxis=eyarray(zzeroindex,:);
+
 plot(xarray,xsourceaxis,'-r');
 title(strcat('Intensity profile (EE*) at source, thetamax: ', num2str(thetamax),' degs'));
 xlabel('x ,d_s');

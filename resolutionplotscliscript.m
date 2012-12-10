@@ -17,9 +17,9 @@ thetamaxvals=indata(:,5);
 
 
 plot(thetamaxvals,fwhmvals,'-xr');
-title(strcat('Resolution for given thetamax, second interface: ', num2str(secondinterface),' ds'));
+title(strcat('Resolution for given thetamax, second interface: ', num2str(secondinterface),' d_s'));
 xlabel('thetamax, degrees');
-ylabel('FWHM of intensity of image');
+ylabel('FWHM of intensity of image, d_s');
 print('-dpng',strcat('plots/resplot',num2str(secondinterface),'secint.png'));
 
 

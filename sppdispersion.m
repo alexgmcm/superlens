@@ -1,0 +1,15 @@
+omegatilde=[0:0.01:0.7];
+omegasp=ones(71,1)*(1/sqrt(2));
+kxtilde=omegatilde.*sqrt((omegatilde.^2 - 1)./(2*omegatilde.^2 - 1));
+kxreal=real(kxtilde);
+plot(kxreal, omegatilde, 'r-');
+hold on;
+plot(kxreal, omegasp, 'b-');
+plot(kxreal,kxreal,'g-');
+xlim([0 3.5]);
+ylim([0 1]);
+ylabel('$\displaystyle\frac{\omega}{\omega_p}$','interpreter','latex');
+xlabel('$\displaystyle\frac{k_x c}{\omega_p}$','interpreter','latex');
+hleg = legend('Metal', 'NIM', 'Light Line');
+title('Dispersion relation of a surface plasmon at interface between free space and media');
+print('-dpdf','~/superlens/spdispersionrelation.pdf');

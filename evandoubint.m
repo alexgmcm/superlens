@@ -2,26 +2,26 @@
 %eyabs is now intensity
 zi=0;
 xi=-10;
-zf=20;
+zf=10;
 xf=10;
 zstepfrac=0.1;
 xstepfrac=0.01;
 size=ceil(((zf-zi)/(zstepfrac)))+1;
 sizex=ceil(((xf-xi)/(xstepfrac)))+1;
-eta='1';
+eta='2.0';
 kx=1.5;
 eps2=-1;
 mu2=-1;
 thetai='0';
-dsource=1;
+dsource=1.0;
 secondinterface=3*dsource;
-
+imagepos=4*dsource;
 sizesquare=ceil(double(size)*double(sizex));
 data=zeros(sizesquare, 4, 7);
 
 
 
-data(:,:,1) = load(strcat('data/evandoubint1.5kx1.0eta3.0secint.dat'));
+data(:,:,1) = load(strcat('data/evandoubint',num2str(kx),'kx',eta,'eta',num2str(secondinterface,'%3.1f'),'secint.dat'));
 
 
 
@@ -82,6 +82,10 @@ plot(zarray,imageaxis,'-r');
 title(strcat('abs(Ey) vs z, kx:', num2str(kx),' eta:', eta ));
 xlabel('z ,d_s');
 ylabel('abs(Ey)');
-%ylim([0 7e-03])
+line([dsource dsource], [0 ceil(max(imageaxis))],'linewidth',1,'Color', 'k');
+line([secondinterface secondinterface],[0 ceil(max(imageaxis))],'linewidth',1,'Color', 'k');
+line([imagepos imagepos], [0 ceil(max(imageaxis))],'linewidth',1,'Color', 'k');
+line([0 max(zarray)], [1 1],'linewidth',1,'Color', 'k','LineStyle','--');
+ylim([0 ceil(max(imageaxis))])
 print('-dpng',strcat('plots/eyrpprofile',num2str(kx),'kxeta',eta,'.png'));
 

@@ -23,7 +23,7 @@ complex*16, dimension(:,:), allocatable :: Eyarray
 i = (0.0,1.0)
 ztildei=0
 xtildei=-10
-ztildef=20
+ztildef=10
 xtildef=10
 ztildestepfrac=0.1
 xtildestepfrac=0.01
@@ -66,7 +66,7 @@ end do
 do p=0, ztildesize
 	ztildearray(p)= ztildei + p*ztildestepfrac
 end do
-eta=1.0
+eta=2.0
 kxtilde=1.5
 kz1tilde=sqrt(abs((n1*eta)**2 - kxtilde**2))
 print*, " n2= ", n2 

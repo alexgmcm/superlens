@@ -1,14 +1,14 @@
 function darkresolutionsuperlenscliscript(secondinterface, thetamax)
 %eyabs is now intensity
-zi=-5;
+zi=0;
 xi=-10;
-zf=15;
+zf=10;
 xf=10;
 zstepfrac=0.1;
 xstepfrac=0.01;
 size=ceil(((zf-zi)/(zstepfrac)))+1;
 sizex=ceil(((xf-xi)/(xstepfrac)))+1;
-eta='pi';
+eta='1.0';
 eps2=-1;
 mu2=-1;
 thetai='0';
@@ -24,7 +24,7 @@ data=zeros(sizesquare, 4, 7);
 
 
 gs=num2str(g, '%5.3f');
-data(:,:,1) = load(strcat('data/darkres',num2str(thetamax, '%3.1f'),'degs','3.1eta',gs,'sigmatilde',num2str(secondinterface,'%2.1f'),'secint.dat'));
+data(:,:,1) = load(strcat('data/darkres',num2str(thetamax, '%3.1f'),'degs','1.0eta',gs,'sigmatilde',num2str(secondinterface,'%2.1f'),'secint.dat'));
 
 
 
@@ -79,9 +79,25 @@ print('-dpng',strcat('plots/darkreal_res',num2str(thetamax),'degspieta',gs,'sigm
 
 
 imageaxis=eyarray(:,xzeroindex);
+zimageaxis=eyarray(:,xzeroindex);
 imageaxis=imageaxis(zsecondinterface:length(imageaxis));
 [maxval,imageindex]=max(imageaxis);
 zimagepos=zarray(zsecondinterface+imageindex-1);
+
+plot(zarray,zimageaxis,'-r');
+title(strcat('abs(Ey) vs z,eta:', eta ));
+xlabel('z ,d_s');
+ylabel('abs(Ey)');
+line([dsource dsource], [0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
+line([secondinterface secondinterface],[0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
+line([zimagepos zimagepos], [0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
+line([0 max(zarray)], [1 1],'linewidth',1,'Color', 'k','LineStyle','--');
+ylim([0 ceil(max(zimageaxis))])
+print('-dpng',strcat('plots/darkeyrpprofileeta',eta,'.png'));
+
+
+
+
 
 slabthickness=secondinterface-dsource;
 

@@ -28,9 +28,9 @@ complex*16 :: darkkz1tilde, darkkz2tilde, darkdenominator, darkA, darkC2, darkD,
 !The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
 ! i.e. xtilde = x/d etc.
 
-ztildei=-5
+ztildei=0
 xtildei=-10
-ztildef=15
+ztildef=10
 xtildef=10
 ztildestepfrac=0.1
 xtildestepfrac=0.01
@@ -82,7 +82,7 @@ i = (0.0,1.0)
 !Can just use normal functions as modern fortran can determine the type required, 
 !specialist csqrt etc. are obsolete
 
-eta = PI
+eta = 1
 !go from 0.1 to 5, dimensionless parameter equal to omega*d/c
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
@@ -117,7 +117,7 @@ do m=0, ztildesize
 				kxtildeprime= -(5*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) )*exp(i*kxtilde*xtilde) * darkstepfrac
+			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 				!etatest=eta**2-kxtilde**2 ! ????? what does this do?
 				! integral code will depend on limits/area so can't go in subroutine
@@ -132,7 +132,7 @@ do m=0, ztildesize
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) )*exp(i*kxtilde*xtilde) * darkstepfrac
+			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac !* exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 
@@ -165,7 +165,7 @@ do m=0, ztildesize
 				kxtildeprime= -(5*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) )*exp(i*kxtilde*xtilde) * darkstepfrac
+			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 
@@ -174,7 +174,7 @@ do m=0, ztildesize
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) )*exp(i*kxtilde*xtilde) * darkstepfrac
+			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 
@@ -200,14 +200,14 @@ do m=0, ztildesize
 			do p=0, numkxpoints
 				kxtildeprime= -(5*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde)))*exp(i*kxtilde*xtilde) * darkstepfrac
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac !*exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 			!Dark parts upper limits
 			do p=0, numkxpoints
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde)))*exp(i*kxtilde*xtilde) * darkstepfrac
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac !*exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 			!light part truncated (transmitted wave)
@@ -225,7 +225,7 @@ do m=0, ztildesize
 ! 		if(etatest.LT.0.0d0) then
 ! 			Eykspacearray(n,m)=0
 ! 		end if
-		write(2,10) xtilde, ztilde, (abs(Eykspace)**2), RealPart(Eykspace) !intensity - therefore squared
+		write(2,10) xtilde, ztilde, (abs(Eykspace)), RealPart(Eykspace) !intensity - therefore squared
 	end do
 end do
 

@@ -82,7 +82,7 @@ i = (0.0,1.0)
 !Can just use normal functions as modern fortran can determine the type required, 
 !specialist csqrt etc. are obsolete
 
-eta = 1
+eta = PI
 !go from 0.1 to 5, dimensionless parameter equal to omega*d/c
 ! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
 ! w and d and lambda are all replaced by eta
@@ -100,7 +100,7 @@ tilen=LEN(TRIM(ti)) !this is just for filename purposes
 numkxpoints = 200
 cutkxtildeprimestepfrac = ((2*eta*SIN(thetamaxrad))/numkxpoints) 
 kxtildeprimestepfrac = ((2*eta)/numkxpoints)
-etalimit=5
+etalimit=3
 darkstepfrac= (((etalimit-1)*eta)/numkxpoints)
 
 write(filename,20) 'data/darkres',thetamax,'degs',eta,'eta', sigmatilde,'sigmatilde',secondinterface,'secint.dat'
@@ -118,7 +118,7 @@ do m=0, ztildesize
 				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
+			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac *exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 				!etatest=eta**2-kxtilde**2 ! ????? what does this do?
 				! integral code will depend on limits/area so can't go in subroutine
@@ -133,7 +133,7 @@ do m=0, ztildesize
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac !* exp(i*kxtilde*xtilde)
+			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac * exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 
@@ -166,7 +166,7 @@ do m=0, ztildesize
 				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
+			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 
@@ -175,7 +175,7 @@ do m=0, ztildesize
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
+			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 
@@ -201,22 +201,22 @@ do m=0, ztildesize
 			do p=0, numkxpoints
 				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac !*exp(i*kxtilde*xtilde)
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 			!Dark parts upper limits
 			do p=0, numkxpoints
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac !*exp(i*kxtilde*xtilde)
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral
 			end do
 			!light part truncated (transmitted wave)
 ! 			do p=0, numkxpoints
-! 				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !this part depends on limits
+! 				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
 ! 				call SHAREDINTEGRALCODE()
 ! 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-! 					*(EXP( (-sigmatilde*(( cutkxtildeprime )**2)/2.0) & 
+! 					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
 ! 					 + (i* kxtilde* xtilde  ) + (i*kz1tilde*ztilde ) ) & 
 ! 			 		 *cutkxtildeprimestepfrac)
 ! 					Eykspace = Eykspace + (t*integral)

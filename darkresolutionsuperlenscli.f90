@@ -18,7 +18,7 @@ double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, eps1, mu1, mu
 double precision :: thetamaxrad, cutkxtildeprimestepfrac, ztilde, xtilde
 complex*16 :: A, B, C2, D, i, integral, integral2, chi, n1, n2, eps2
 complex*16 :: r, t, kztildeprime, kz1tilde,kz2tilde,kxtilde, Ce, De, rnumerator, rdenominator, Eykspace, kxtildeprime
-integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag, numkxpoints
+integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag, numkxpoints, etalimit
 character :: filename*150, ti*10, cmd1*50, cmd2*50 
 
 double precision :: darkstepfrac
@@ -100,7 +100,8 @@ tilen=LEN(TRIM(ti)) !this is just for filename purposes
 numkxpoints = 200
 cutkxtildeprimestepfrac = ((2*eta*SIN(thetamaxrad))/numkxpoints) 
 kxtildeprimestepfrac = ((2*eta)/numkxpoints)
-darkstepfrac= ((4*eta)/numkxpoints)
+etalimit=5
+darkstepfrac= (((etalimit-1)*eta)/numkxpoints)
 
 write(filename,20) 'data/darkres',thetamax,'degs',eta,'eta', sigmatilde,'sigmatilde',secondinterface,'secint.dat'
 open(unit=2,file= filename)
@@ -114,7 +115,7 @@ do m=0, ztildesize
 		if(ztilde <= dsourcetilde) then
 			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
 			do p=0, numkxpoints
-				kxtildeprime= -(5*eta) + p*darkstepfrac !this part depends on limits
+				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
 			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
@@ -162,7 +163,7 @@ do m=0, ztildesize
 		elseif ( ztilde <= (secondinterface) ) then
 			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
 			do p=0, numkxpoints
-				kxtildeprime= -(5*eta) + p*darkstepfrac !this part depends on limits
+				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
 			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac !*exp(i*kxtilde*xtilde)
@@ -198,7 +199,7 @@ do m=0, ztildesize
 		else
 			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
 			do p=0, numkxpoints
-				kxtildeprime= -(5*eta) + p*darkstepfrac !this part depends on limits
+				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac !*exp(i*kxtilde*xtilde)
 				Eykspace = Eykspace + integral

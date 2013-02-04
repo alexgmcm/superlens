@@ -91,7 +91,7 @@ ylabel('abs(Ey)');
 line([dsource dsource], [0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
 line([secondinterface secondinterface],[0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
 line([zimagepos zimagepos], [0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
-line([0 max(zarray)], [1 1],'linewidth',1,'Color', 'k','LineStyle','--');
+line([0 max(zarray)], [zimageaxis(1) zimageaxis(1)],'linewidth',1,'Color', 'k','LineStyle','--');
 ylim([0 ceil(max(zimageaxis))])
 print('-dpng',strcat('plots/darkeyrpprofileeta',eta,'.png'));
 

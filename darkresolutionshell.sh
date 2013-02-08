@@ -14,7 +14,7 @@ do
 		while read maxtheta           
 			do   
 			echo "$maxtheta"        
-			./test.out $secint $maxtheta
+			./darktest.out $secint $maxtheta $darkcutoff
 			./matlab_batcher4.sh darkresolutionsuperlenscliscript $secint $maxtheta $darkcutoff
 
 		done <maxthetalist.txt

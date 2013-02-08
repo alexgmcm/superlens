@@ -1,4 +1,4 @@
-function darkresolutionsuperlenscliscript(secondinterface, thetamax)
+function darkresolutionsuperlenscliscript(secondinterface, thetamax, etacutoff)
 %eyabs is now intensity
 zi=0;
 xi=-10;
@@ -13,7 +13,7 @@ eps2=-1;
 mu2=-1;
 thetai='0';
 dsource=1;
-kxcutoff='3.0';
+%kxcutoff='3.0';
 %secondinterface=3*dsource;
 firstinterface=dsource;
 
@@ -27,7 +27,7 @@ data=zeros(sizesquare, 4, 7);
 
 
 gs=num2str(g, '%5.3f');
-data(:,:,1) = load(strcat('data/darkres',num2str(thetamax, '%3.1f'),'degs','3.1eta',gs,'sigmatilde',num2str(secondinterface,'%2.1f'),'secint.dat'));
+data(:,:,1) = load(strcat('data/darkres',num2str(thetamax, '%3.1f'),'degs','3.1eta',gs,'sigmatilde',num2str(secondinterface,'%2.1f'),'secint',num2str(etacutoff,'%2.0f'),'etacutoff.dat'));
 
 
 
@@ -63,23 +63,23 @@ end
 k=imagesc(xarray,zarray,eyarray);
 xlabel('x/dsource');
 ylabel('z/dsource');
-title(strcat('g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta,' kxcutoff=',kxcutoff ));
+title(strcat('g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta,' kxcutoff=',num2str(etacutoff,'%2.0f') ));
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[secondinterface secondinterface],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng',strcat('plots/darkim_res',num2str(thetamax),'degspieta',gs,'sigmatilde',num2str(eps2),'eps2','kxcutoff',kxcutoff,num2str(secondinterface),'secint.png'));
+print('-dpng',strcat('plots/darkim_res',num2str(thetamax),'degspieta',gs,'sigmatilde',num2str(eps2),'eps2','kxcutoff',num2str(etacutoff,'%2.0f'),num2str(secondinterface),'secint.png'));
 
 
 k=imagesc(xarray,zarray,eyrparray);
 xlabel('x/dsource');
 ylabel('z/dsource');
-title(strcat('real part: g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta ,' kxcutoff=',kxcutoff ));
+title(strcat('real part: g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta ,' kxcutoff=',num2str(etacutoff,'%2.0f') ));
 colorbar;
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[secondinterface secondinterface],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');
-print('-dpng',strcat('plots/darkreal_res',num2str(thetamax),'degspieta',gs,'sigmatilde',num2str(eps2),'eps2','kxcutoff',kxcutoff,num2str(secondinterface),'secint.png'));
+print('-dpng',strcat('plots/darkreal_res',num2str(thetamax),'degspieta',gs,'sigmatilde',num2str(eps2),'eps2','kxcutoff',num2str(etacutoff,'%2.0f'),num2str(secondinterface),'secint.png'));
 
 
 imageaxis=eyarray(:,xzeroindex);
@@ -97,7 +97,7 @@ line([secondinterface secondinterface],[0 ceil(max(zimageaxis))],'linewidth',1,'
 line([zimagepos zimagepos], [0 ceil(max(zimageaxis))],'linewidth',1,'Color', 'k');
 line([0 max(zarray)], [zimageaxis(1) zimageaxis(1)],'linewidth',1,'Color', 'k','LineStyle','--');
 ylim([0 ceil(max(zimageaxis))])
-print('-dpng',strcat('plots/darkeyrpprofileeta',eta,'kxcutoff',kxcutoff,'.png'));
+print('-dpng',strcat('plots/darkeyrpprofileeta',eta,'kxcutoff',num2str(etacutoff,'%2.0f'),'.png'));
 
 
 
@@ -112,33 +112,33 @@ xfirstintaxis=eyarray(zfirstinterface,:);
 
 
 plot(xarray,ximageaxis,'-r');
-title(strcat('Intensity profile (EE*) at image, thetamax: ', num2str(thetamax),' degs','kxcutoff',kxcutoff));
+title(strcat('Intensity profile (EE*) at image, thetamax: ', num2str(thetamax),' degs','kxcutoff',num2str(etacutoff,'%2.0f')));
 xlabel('x ,d_s');
 ylabel('Intensity (EE*)');
 %ylim([0 7e-03])
-print('-dpng',strcat('plots/darkimageprofile','kxcutoff',kxcutoff,num2str(thetamax),'degsthetamax.png'));
+print('-dpng',strcat('plots/darkimageprofile','kxcutoff',num2str(etacutoff,'%2.0f'),num2str(thetamax),'degsthetamax.png'));
 
 
 plot(xarray,xsourceaxis,'-r');
-title(strcat('Intensity profile (EE*) at source, thetamax: ','kxcutoff',kxcutoff, num2str(thetamax),' degs'));
+title(strcat('Intensity profile (EE*) at source, thetamax: ','kxcutoff',num2str(etacutoff,'%2.0f'), num2str(thetamax),' degs'));
 xlabel('x ,d_s');
 ylabel('Intensity (EE*)');
-print('-dpng',strcat('plots/darksourceprofile','kxcutoff',kxcutoff,num2str(thetamax),'degsthetamax.png'));
+print('-dpng',strcat('plots/darksourceprofile','kxcutoff',num2str(etacutoff,'%2.0f'),num2str(thetamax),'degsthetamax.png'));
 
 
 plot(xarray,xsecintaxis,'-r');
-title(strcat('Intensity profile (EE*) at secondinterface, thetamax: ','kxcutoff',kxcutoff, num2str(thetamax),' degs'));
+title(strcat('Intensity profile (EE*) at secondinterface, thetamax: ','kxcutoff',num2str(etacutoff,'%2.0f'), num2str(thetamax),' degs'));
 xlabel('x ,d_s');
 ylabel('Intensity (EE*)');
-print('-dpng',strcat('plots/darksecintprofile','kxcutoff',kxcutoff,num2str(thetamax),'degsthetamax.png'));
+print('-dpng',strcat('plots/darksecintprofile','kxcutoff',num2str(etacutoff,'%2.0f'),num2str(thetamax),'degsthetamax.png'));
 
 
 
 plot(xarray,xfirstintaxis,'-r');
-title(strcat('Intensity profile (EE*) at firstinterface, thetamax: ','kxcutoff',kxcutoff, num2str(thetamax),' degs'));
+title(strcat('Intensity profile (EE*) at firstinterface, thetamax: ','kxcutoff',num2str(etacutoff,'%2.0f'), num2str(thetamax),' degs'));
 xlabel('x ,d_s');
 ylabel('Intensity (EE*)');
-print('-dpng',strcat('plots/darkfirstintprofile','kxcutoff',kxcutoff,num2str(thetamax),'degsthetamax.png'));
+print('-dpng',strcat('plots/darkfirstintprofile','kxcutoff',num2str(etacutoff,'%2.0f'),num2str(thetamax),'degsthetamax.png'));
 
 
 [xmaxval,ximageindex]=max(ximageaxis);
@@ -156,8 +156,8 @@ fwhm=rightval-leftval;
 expectedpendry=(slabthickness-dsource)+secondinterface;
 
 fid = fopen(strcat('data/darkplotdata',num2str(secondinterface),'secint.txt'), 'a');
-outdata = [slabthickness;zimagepos;fwhm;expectedpendry;thetamax];
-fprintf(fid, '%3.1f %3.1f %6.4f %3.1f %3.1f\n', outdata);
+outdata = [slabthickness;zimagepos;fwhm;expectedpendry;thetamax;etacutoff];
+fprintf(fid, '%3.1f %3.1f %6.4f %3.1f %3.1f %2.0f\n', outdata);
 fclose(fid);
 
 

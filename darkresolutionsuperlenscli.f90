@@ -19,7 +19,7 @@ double precision :: thetamaxrad, cutkxtildeprimestepfrac, ztilde, xtilde
 complex*16 :: A, B, C2, D, i, integral, integral2, chi, n1, n2, eps2
 complex*16 :: r, t, kztildeprime, kz1tilde,kz2tilde,kxtilde, Ce, De, rnumerator, rdenominator, Eykspace, kxtildeprime
 integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag, numkxpoints, etalimit
-character :: filename*150, ti*10, cmd1*50, cmd2*50 
+character :: filename*150, ti*10, cmd1*50, cmd2*50, cmd3*50
 
 double precision :: darkstepfrac
 complex*16 :: darkkz1tilde, darkkz2tilde, darkdenominator, darkA, darkC2, darkD, darkT
@@ -100,10 +100,12 @@ tilen=LEN(TRIM(ti)) !this is just for filename purposes
 numkxpoints = 200
 cutkxtildeprimestepfrac = ((2*eta*SIN(thetamaxrad))/numkxpoints) 
 kxtildeprimestepfrac = ((2*eta)/numkxpoints)
-etalimit=3
+!etalimit=3
+CALL GETARG(3,cmd3)
+READ(UNIT=cmd3, FMT=*) etalimit
 darkstepfrac= (((etalimit-1)*eta)/numkxpoints)
 
-write(filename,20) 'data/darkres',thetamax,'degs',eta,'eta', sigmatilde,'sigmatilde',secondinterface,'secint.dat'
+write(filename,20) 'data/darkres',thetamax,'degs',eta,'eta', sigmatilde,'sigmatilde',secondinterface,'secint',etalimit,'etalimit.dat'
 open(unit=2,file= filename)
 
 do m=0, ztildesize
@@ -232,7 +234,7 @@ end do
 
 
 10	format(4e15.5,4e15.5,4e15.5,4e15.5)
-20 	format(A,f4.1,A,f3.1,A,f5.3,A,f3.1,A)
+20 	format(A,f4.1,A,f3.1,A,f5.3,A,f3.1,A,f2.0,A)
 
 !cmd='./matlab_batcher.sh superlenscliscript ', sigmatilde
 !write (cmd, "(A39,I2)") "hello", 10

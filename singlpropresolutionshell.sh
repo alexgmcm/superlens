@@ -1,8 +1,8 @@
 #!/bin/sh
 
-seq 90 -10 90 > maxthetalist.txt
+seq 90 -10 10 > maxthetalist.txt
 seq 3.0 1.0 3.0 > secondinterfacelist.txt
-seq 2 2 10 > combcutofflist.txt
+seq 30 2 30 > combcutofflist.txt
 
 
 while read combcutoff
@@ -13,8 +13,8 @@ while read combcutoff
 		while read maxtheta           
 			do   
 			echo "$maxtheta"        
-			./combtest.out $secint $maxtheta $combcutoff
-			./matlab_batcher4.sh combinedresolutionsuperlenscliscript $secint $maxtheta $combcutoff
+			./singprop.out $secint $maxtheta $combcutoff
+			./matlab_batcher4.sh singpropscript $secint $maxtheta $combcutoff
 
 		done <maxthetalist.txt
 		#./matlab_batcher.sh resolutionplotscliscript $secint

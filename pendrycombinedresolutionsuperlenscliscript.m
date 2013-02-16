@@ -86,9 +86,7 @@ imageaxis=eyarray(:,xzeroindex);
 zimageaxis=eyarray(:,xzeroindex);
 imageaxis=imageaxis(zsecondinterface:length(imageaxis));
 [maxval,imageindex]=max(imageaxis);
-imageindex=find(zarray==4.0);
-zimagepos=zarray(imageindex);
-%zimagepos=zarray(zsecondinterface+imageindex-1);
+zimagepos=zarray(zsecondinterface+imageindex-1);
 
 plot(zarray,zimageaxis,'-r');
 title(strcat('Intensity vs z,eta:', eta ));
@@ -107,8 +105,7 @@ print('-dpng',strcat('plots/combeyrpprofileeta',eta,'kxcutoff',num2str(etacutoff
 
 slabthickness=secondinterface-dsource;
 
-%ximageaxis=eyarray(zsecondinterface+imageindex,:);
-ximageaxis=eyarray(imageindex,:);
+ximageaxis=eyarray(zsecondinterface+imageindex,:);
 xsourceaxis=eyarray(zzeroindex,:);
 xsecintaxis=eyarray(zsecondinterface,:);
 xfirstintaxis=eyarray(zfirstinterface,:);

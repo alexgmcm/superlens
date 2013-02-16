@@ -123,7 +123,8 @@ do m=0, ztildesize
 				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac *exp(i*kxtilde*xtilde)
+			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac *exp(i*kxtilde*xtilde) *&
+			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 				!etatest=eta**2-kxtilde**2 ! ????? what does this do?
 				! integral code will depend on limits/area so can't go in subroutine
@@ -138,7 +139,8 @@ do m=0, ztildesize
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac * exp(i*kxtilde*xtilde)
+			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac * exp(i*kxtilde*xtilde)*&
+			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 			end do
 
@@ -171,7 +173,8 @@ do m=0, ztildesize
 				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)
+			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)*&
+			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 			end do
 
@@ -180,7 +183,8 @@ do m=0, ztildesize
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)
+			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)*&
+			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 			end do
 
@@ -206,14 +210,16 @@ do m=0, ztildesize
 			do p=0, numkxpoints
 				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)*&
+			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 			end do
 			!Dark parts upper limits
 			do p=0, numkxpoints
 				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)*&
+			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 			end do
 			!light part truncated (transmitted wave)
@@ -282,12 +288,16 @@ CONTAINS
 		De=(2*(chi - 1)*A*(B**(-1))) / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) )
 		t=(chi/D)*( (4*A* (B**(-1)) *(C2**(-1)))  / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) ) )		
 
+		!print*, "r=", r, " ce=",Ce," De=",De," t=",t
+
 		darkdenominator=(((chi+1)**2)-((chi-1)**2)*exp(-4*darkkz2tilde*dsourcetilde)) 
 		darkD=((2*(chi-1)*exp(-darkkz1tilde*dsourcetilde)*exp(-2*darkkz2tilde)*dsourcetilde))/darkdenominator
 		darkT=(4*chi*exp(-darkkz1tilde*dsourcetilde)*exp(-2*darkkz2tilde*dsourcetilde))/darkdenominator
 		darkC2=(2*exp(-darkkz1tilde*dsourcetilde)*(chi+1))/darkdenominator
-		!A=C2 + D*exp(-2*kz2tilde*dsourcetilde) - exp(-kz1tilde*dsourcetilde)
+		!darkA=darkC2 + darkD*exp(-2*darkkz2tilde*dsourcetilde) - exp(-darkkz1tilde*dsourcetilde)
 		darkA=0 !should be zero but floating point is causing problems
+
+		!print*, "darkD=", darkD, " darkT=",darkT," darkC2=",darkC2," darkA=", darkA
 	   	RETURN
 	 END SUBROUTINE
 

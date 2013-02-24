@@ -2,7 +2,7 @@
 
 seq 90 -10 90 > maxthetalist.txt
 seq 3.0 1.0 3.0 > secondinterfacelist.txt
-seq 2 2 10 > combcutofflist.txt
+seq 30 2 30 > combcutofflist.txt
 
 
 while read combcutoff

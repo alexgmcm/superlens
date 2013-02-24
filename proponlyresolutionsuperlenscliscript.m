@@ -16,7 +16,7 @@ dsource=1;
 kxcutoff='3.0';
 %secondinterface=3*dsource;
 firstinterface=dsource;
-
+imageplane=4*dsource;
 
 g=0.001
 %for x=1:1
@@ -82,11 +82,14 @@ line([xi xf],[secondinterface secondinterface],'linewidth',4,'Color', 'k');
 print('-dpng',strcat('plots/propreal_res',num2str(thetamax),'degspieta',gs,'sigmatilde',num2str(eps2),'eps2','kxcutoff',kxcutoff,num2str(secondinterface),'secint.png'));
 
 
-imageaxis=eyarray(:,xzeroindex);
+%imageaxis=eyarray(:,xzeroindex);
 zimageaxis=eyarray(:,xzeroindex);
-imageaxis=imageaxis(zsecondinterface:length(imageaxis));
-[maxval,imageindex]=max(imageaxis);
-zimagepos=zarray(zsecondinterface+imageindex-1);
+%imageaxis=imageaxis(zsecondinterface:length(imageaxis));
+%[maxval,imageindex]=max(imageaxis);
+%zimagepos=zarray(zsecondinterface+imageindex-1);
+zimagepos=find(zarray==imageplane);
+
+
 
 plot(zarray,zimageaxis,'-r');
 title(strcat('Intensity vs z,eta:', eta ));
@@ -105,7 +108,7 @@ print('-dpng',strcat('plots/propeyrpprofileeta',eta,'kxcutoff',kxcutoff,'.png'))
 
 slabthickness=secondinterface-dsource;
 
-ximageaxis=eyarray(zsecondinterface+imageindex,:);
+ximageaxis=eyarray(zimagepos,:);
 xsourceaxis=eyarray(zzeroindex,:);
 xsecintaxis=eyarray(zsecondinterface,:);
 xfirstintaxis=eyarray(zfirstinterface,:);
@@ -144,12 +147,12 @@ print('-dpng',strcat('plots/propfirstintprofile','kxcutoff',kxcutoff,num2str(the
 [xmaxval,ximageindex]=max(ximageaxis);
 lhs=ximageaxis(1:ximageindex);
 rhs=ximageaxis(ximageindex:length(ximageaxis));
-llowerind= find(lhs<=(max(imageaxis)/2),1,'last');
-lhigherind=find(lhs>=(max(imageaxis)/2),1,'first');
+llowerind= find(lhs<=(max(ximageaxis)/2),1,'last');
+lhigherind=find(lhs>=(max(ximageaxis)/2),1,'first');
 leftval=(xarray(lhigherind)+xarray(llowerind))/2;
 
-rlowerind=find(rhs>=(max(imageaxis)/2),1,'last');
-rhigherind= find(rhs<=(max(imageaxis)/2),1,'first');
+rlowerind=find(rhs>=(max(ximageaxis)/2),1,'last');
+rhigherind= find(rhs<=(max(ximageaxis)/2),1,'first');
 rightval=(xarray(ximageindex+rhigherind-1)+xarray(ximageindex+rlowerind-1))/2;
 
 fwhm=rightval-leftval;

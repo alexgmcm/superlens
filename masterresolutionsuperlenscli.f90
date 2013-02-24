@@ -9,31 +9,69 @@
 
 !have CLI just for second interface (to vary slab thickness) and thetamax, the maximum incident angle assumed to hit the slab
 !CLI: ./test.out SECONDINTERFACE THETAMAX
-PROGRAM combinedresolutionsuperlenscli
+PROGRAM masterresolutionsuperlenscli
 implicit none !doesn't assume types from names, must be declared explicitly
 !use strings
 ! Declare stuff here - check these are all necessary
 double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildeprimestepfrac, dsourcetilde, secondinterface
 double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, eps1, mu1, mu2, etatest, sigmatilde, smallval, thetamax 
-double precision :: thetamaxrad, cutkxtildeprimestepfrac, ztilde, xtilde
+double precision :: thetamaxrad, ztilde, xtilde
 complex*16 :: A, B, C2, D, i, integral, integral2, chi, n1, n2, eps2
 complex*16 :: r, t, kztildeprime, kz1tilde,kz2tilde,kxtilde, Ce, De, rnumerator, rdenominator, Eykspace, kxtildeprime
-integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag, numkxpoints, etalimit
-character :: filename*150, ti*10, cmd1*50, cmd2*50, cmd3*2, etalimitstring*2
+integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag, numkxpoints,darknumkxpoints,cutnumkxpoints, etalimit, modeflag
+integer*4 :: imageflag
+character :: filename*150, ti*10, cmd1*50, cmd2*50, cmd3*2, etalimitstring*2, cmd4*1, cmd5*1, imagestring*20, modestring*20
 
-double precision :: darkstepfrac
 complex*16 :: darkkz1tilde, darkkz2tilde, darkdenominator, darkA, darkC2, darkD, darkT
 
 
+
+
+PI=4.D0*DATAN(1.D0) 
+!ensures maximum precision on any architechture apparently
+smallval = 0.1
+thetai= (smallval/180.0)*PI !also change ti
+
+
+CALL GETARG(1,cmd1)
+READ(UNIT=cmd1, FMT=*) secondinterface
+
+CALL GETARG(2,cmd2)
+READ(UNIT=cmd2, FMT=*) thetamax
+print*, "thetamax=", thetamax
+thetamaxrad = (thetamax/180.0)*PI
+
+CALL GETARG(3,cmd3)
+READ(UNIT=cmd3, FMT=*) etalimit
+
+CALL GETARG(4,cmd4)
+READ(UNIT=cmd4, FMT=*) modeflag
+!modeflag=0 proponly, 1 combined, 2 darkonly
+
+
+CALL GETARG(5,cmd5)
+READ(UNIT=cmd5, FMT=*) imageflag
+!imageflag=0 full 2d, 1 image, 2 source
+
 !The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
 ! i.e. xtilde = x/d etc.
+xtildei=-1
+xtildef=1
+
+if(imageflag==0) then
+	xtildei=-10
+	xtildef=10
+end if
+
 
 ztildei=0
-xtildei=-10
 ztildef=10
-xtildef=10
+
 ztildestepfrac=0.1
-xtildestepfrac=0.01
+xtildestepfrac=0.001
+if(imageflag==0) then
+	xtildestepfrac=0.01
+end if
 
 !The distance from the source to the interface parametised by d (in zspace)
 dsourcetilde = 1
@@ -56,22 +94,17 @@ ti = '0' !also change thetai
 !change thetai AND ti
 !angle of incidence (i.e. rotation of frame, but we are staying in non-rotated space)
 
-PI=4.D0*DATAN(1.D0) 
-!ensures maximum precision on any architechture apparently
-smallval = 0.1
-thetai= (smallval/180.0)*PI !also change ti
 
-CALL GETARG(2,cmd2)
-READ(UNIT=cmd2, FMT=*) thetamax
-print*, "thetamax=", thetamax
-thetamaxrad = (thetamax/180.0)*PI
+
+
+
 
 n1=SQRT(eps1*mu1)
 n2=SQRT(eps2*mu2)
 
 if ((RealPart(n2) < 0 .and. RealPart(eps2) > 0) .or. &
- (RealPart(eps2) < 0 .and. mu2<0 .and. RealPart(n2) > 0 )) then
-	n2 = -1 * n2
+	(RealPart(eps2) < 0 .and. mu2<0 .and. RealPart(n2) > 0 )) then
+n2 = -1 * n2
 end if
 
 xtildesize = anint(((xtildef-xtildei)/xtildestepfrac))
@@ -88,8 +121,7 @@ eta = PI
 ! w and d and lambda are all replaced by eta
 
 sigmatilde=0.001
-CALL GETARG(1,cmd1)
-READ(UNIT=cmd1, FMT=*) secondinterface
+
 !CALL VALUE(cmd, sigmatilde, errflag) 
 !print*, "errflag=", errflag
 !sigma is form of gaussian beamwidth parameter, here taken to be the squared value, dimensions of area
@@ -97,34 +129,76 @@ READ(UNIT=cmd1, FMT=*) secondinterface
 print*, "secondinterface=", secondinterface
 
 tilen=LEN(TRIM(ti)) !this is just for filename purposes
+
 numkxpoints = 200
-cutkxtildeprimestepfrac = ((2*eta*SIN(thetamaxrad))/numkxpoints) 
-kxtildeprimestepfrac = ((2*eta)/numkxpoints)
+!cutkxtildeprimestepfrac = ((2*eta*SIN(thetamaxrad))/numkxpoints) 
+kxtildeprimestepfrac = ((2.0*eta)/numkxpoints)
+darknumkxpoints = anint(((etalimit-1)*eta)/kxtildeprimestepfrac)
+cutnumkxpoints = anint((2.0*eta*SIN(thetamaxrad))/kxtildeprimestepfrac)
+
+
+
+
 !etalimit=3
-CALL GETARG(3,cmd3)
-READ(UNIT=cmd3, FMT=*) etalimit
-darkstepfrac= (((etalimit-1)*eta)/numkxpoints)
+
+!darkstepfrac= (((etalimit-1)*eta)/numkxpoints)
+SELECT CASE (modeflag)
+	CASE (0)
+		modestring='proponly'
+	CASE (1)
+		modestring='combined'
+	CASE (2)
+		modestring='darkonly'
+	CASE DEFAULT
+		print*, "modeflag ERROR: ", modeflag
+END SELECT 
+
+
+SELECT CASE	(imageflag)
+	CASE (0)
+		imagestring='2D'
+	CASE (1)
+		imagestring='imageline'
+	CASE (2)
+		imagestring='sourceline'
+	CASE DEFAULT
+		print*, "imageflag ERROR: ", imageflag
+END SELECT
 
 write(etalimitstring, 30) etalimit
-write(filename,20) 'data/combres',thetamax,'degs',eta,'eta', sigmatilde,'sigmatilde',secondinterface,&
-'secint',trim(adjustl(etalimitstring)),'etalimit.dat'
+write(filename,20) 'data/',trim(adjustl(modestring)),trim(adjustl(imagestring)),thetamax,'degs',eta,'eta', &
+sigmatilde,'sigmatilde',secondinterface, 'secint',trim(adjustl(etalimitstring)),'etalimit.dat'
 
 open(unit=2,file= filename)
 
 do m=0, ztildesize
 	ztilde= ztildei + (m*ztildestepfrac)
+
+	if(imageflag==1) then
+		ztilde=4.0
+	end if
+
+	if(imageflag==2) then
+		ztilde = 0.0
+	end if
+
+
+
+
 	do n=0, xtildesize
 		xtilde= xtildei + (n*xtildestepfrac)
 		Eykspace=0
 		!REGION ONE:
 		if(ztilde <= dsourcetilde) then
+
+			if(modeflag/=0) then
 			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
-			do p=0, numkxpoints
-				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
+			do p=0, darknumkxpoints
+				kxtildeprime= -(etalimit*eta) + p*kxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac *exp(i*kxtilde*xtilde) *&
-			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
+					darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * kxtildeprimestepfrac *exp(i*kxtilde*xtilde) *&
+				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 				!etatest=eta**2-kxtilde**2 ! ????? what does this do?
 				! integral code will depend on limits/area so can't go in subroutine
@@ -135,115 +209,129 @@ do m=0, ztildesize
 			end do
 
 			!Dark parts upper limits
-			do p=0, numkxpoints
-				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
+			do p=0, darknumkxpoints
+				kxtildeprime= (eta) + p*kxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(exp(-darkkz1tilde*ztilde)+ &
-			 darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * darkstepfrac * exp(i*kxtilde*xtilde)*&
-			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
+					darkA*exp(darkkz1tilde*(ztilde-dsourcetilde)) ) * kxtildeprimestepfrac * exp(i*kxtilde*xtilde)*&
+				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
 				Eykspace = Eykspace + integral
 			end do
+		end if
 
+		if(modeflag /= 2) then
 			!light part non-truncated (incident wave)
 
 			do p=0, numkxpoints
 				kxtildeprime= (-eta) + p*kxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
-					 + (i* kxtilde * xtilde  ) + (i*kz1tilde*ztilde ) ) & 
-			 		 *kxtildeprimestepfrac)
-					Eykspace = Eykspace +integral
+				*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
+					+ (i* kxtilde * xtilde  ) + (i*kz1tilde*ztilde ) ) & 
+				*kxtildeprimestepfrac)
+				Eykspace = Eykspace +integral
 			end do
 			!light part truncated (reflected wave)
-			do p=0, numkxpoints
-				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !this part depends on limits
+			do p=0, cutnumkxpoints
+				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
-					 + (i* kxtilde * xtilde  ) + (-i*kz1tilde*ztilde ) ) & 
-			 		 *cutkxtildeprimestepfrac)
-					Eykspace = Eykspace + (r*integral)
-			end do
-
-			!REGION TWO
-		elseif ( ztilde <= (secondinterface) ) then
-			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
-			do p=0, numkxpoints
-				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
-				call SHAREDINTEGRALCODE()
-				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)*&
-			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
-				Eykspace = Eykspace + integral
-			end do
-
-			!Dark parts upper limits
-			do p=0, numkxpoints
-				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
-				call SHAREDINTEGRALCODE()
-				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
-			 darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * darkstepfrac *exp(i*kxtilde*xtilde)*&
-			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
-				Eykspace = Eykspace + integral
-			end do
-
-			!light part truncated (all waves)
-			do p=0, numkxpoints
-				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !this part depends on limits
-				call SHAREDINTEGRALCODE()
-				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
-					 + (i* kxtilde * xtilde  ) + (i*kz2tilde*ztilde ) ) & 
-			 		 *cutkxtildeprimestepfrac)
-
-					integral2= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
-					 + (i* kxtilde * xtilde  ) + (-i*kz2tilde*ztilde ) ) &
-			 		 *cutkxtildeprimestepfrac)
-					Eykspace = Eykspace + (Ce*integral + De*integral2)
-			end do
-
-			!REGION THREE
-		else
-			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
-			do p=0, numkxpoints
-				kxtildeprime= -(etalimit*eta) + p*darkstepfrac !this part depends on limits
-				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)*&
-			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
-				Eykspace = Eykspace + integral
-			end do
-			!Dark parts upper limits
-			do p=0, numkxpoints
-				kxtildeprime= (eta) + p*darkstepfrac !this part depends on limits
-				call SHAREDINTEGRALCODE()
-				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * darkstepfrac *exp(i*kxtilde*xtilde)*&
-			  ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
-				Eykspace = Eykspace + integral
-			end do
-			!light part truncated (transmitted wave)
-			do p=0, numkxpoints
-				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !this part depends on limits
-				call SHAREDINTEGRALCODE()
-				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
-					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
-					 + (i* kxtilde* xtilde  ) + (i*kz1tilde*ztilde ) ) & 
-			 		 *cutkxtildeprimestepfrac)
-					Eykspace = Eykspace + (t*integral)
+				*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
+					+ (i* kxtilde * xtilde  ) + (-i*kz1tilde*ztilde ) ) & 
+				*kxtildeprimestepfrac)
+				Eykspace = Eykspace + (r*integral)
 			end do
 		end if
+			!REGION TWO
+			elseif ( ztilde <= (secondinterface) ) then
+
+				if(modeflag/=0) then
+			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
+			do p=0, darknumkxpoints
+				kxtildeprime= -(etalimit*eta) + p*kxtildeprimestepfrac !this part depends on limits
+				call SHAREDINTEGRALCODE()
+				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
+					darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * kxtildeprimestepfrac *exp(i*kxtilde*xtilde)*&
+				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
+				Eykspace = Eykspace + integral
+			end do
+
+			!Dark parts upper limits
+			do p=0, darknumkxpoints
+				kxtildeprime= (eta) + p*kxtildeprimestepfrac !this part depends on limits
+				call SHAREDINTEGRALCODE()
+				integral=( darkC2*exp(-darkkz2tilde*(ztilde-dsourcetilde)) +&
+					darkD*exp(-darkkz2tilde* (3*dsourcetilde - ztilde) ) ) * kxtildeprimestepfrac *exp(i*kxtilde*xtilde)*&
+				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
+				Eykspace = Eykspace + integral
+			end do
+		end if
+		if(modeflag/=2) then
+			!light part truncated (all waves)
+			do p=0, cutnumkxpoints
+				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
+				call SHAREDINTEGRALCODE()
+				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
+				*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
+					+ (i* kxtilde * xtilde  ) + (i*kz2tilde*ztilde ) ) & 
+				*kxtildeprimestepfrac)
+
+				integral2= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
+				*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
+					+ (i* kxtilde * xtilde  ) + (-i*kz2tilde*ztilde ) ) &
+				*kxtildeprimestepfrac)
+				Eykspace = Eykspace + (Ce*integral + De*integral2)
+			end do
+		end if
+			!REGION THREE
+			else
+				if(modeflag/=0) then
+			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
+			do p=0, darknumkxpoints
+				kxtildeprime= -(etalimit*eta) + p*kxtildeprimestepfrac !this part depends on limits
+				call SHAREDINTEGRALCODE()
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * kxtildeprimestepfrac *exp(i*kxtilde*xtilde)*&
+				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
+				Eykspace = Eykspace + integral
+			end do
+			!Dark parts upper limits
+			do p=0, darknumkxpoints
+				kxtildeprime= (eta) + p*kxtildeprimestepfrac !this part depends on limits
+				call SHAREDINTEGRALCODE()
+				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * kxtildeprimestepfrac *exp(i*kxtilde*xtilde)*&
+				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0)))
+				Eykspace = Eykspace + integral
+			end do
+		end if
+		if(modeflag/=2) then
+			!light part truncated (transmitted wave)
+			do p=0, numkxpoints
+				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
+				call SHAREDINTEGRALCODE()
+				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
+				*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 
+					+ (i* kxtilde* xtilde  ) + (i*kz1tilde*ztilde ) ) & 
+				*kxtildeprimestepfrac)
+				Eykspace = Eykspace + (t*integral)
+			end do
+		end if
+	end if
 		!WHAT DOES THIS DO?
 ! 		if(etatest.LT.0.0d0) then
 ! 			Eykspacearray(n,m)=0
 ! 		end if
 		write(2,10) xtilde, ztilde, (abs(Eykspace))**2, RealPart(Eykspace) !intensity - therefore squared
 	end do
+
+	if (imageflag /= 0) then
+		EXIT
+	end if
+
 end do
 
 
 10	format(4e15.5,4e15.5,4e15.5,4e15.5)
-20 	format(A,f4.1,A,f3.1,A,f5.3,A,f3.1,A,A,A)
+20 	format(A,A,A,f4.1,A,f3.1,A,f5.3,A,f3.1,A,A,A)
 30  format(I2)
 
 !cmd='./matlab_batcher.sh superlenscliscript ', sigmatilde
@@ -254,11 +342,11 @@ end do
 
 
 CONTAINS
-	SUBROUTINE SHAREDINTEGRALCODE()
-		kztildeprime=SQRT(eta**2 - kxtildeprime**2)
-		kxtilde=kxtildeprime*cos(thetai) + kztildeprime*sin(thetai)
-		kz1tilde=sqrt(eta**2 - kxtilde**2)
-		kz2tilde=sqrt((n2*eta)**2 - kxtilde**2)
+SUBROUTINE SHAREDINTEGRALCODE()
+kztildeprime=SQRT(eta**2 - kxtildeprime**2)
+kxtilde=kxtildeprime*cos(thetai) + kztildeprime*sin(thetai)
+kz1tilde=sqrt(eta**2 - kxtilde**2)
+kz2tilde=sqrt((n2*eta)**2 - kxtilde**2)
 		!TO MAKE SURE THAT  i ISNT TAKEN INTO THE KZ PARTS FOR DARK WAVES!!!!
 		darkkz1tilde=sqrt(abs((n1*eta)**2 - kxtilde**2))
 		darkkz2tilde=sqrt(abs((n2*eta)**2 - kxtilde**2))
@@ -298,8 +386,8 @@ CONTAINS
 		darkA=0 !should be zero but floating point is causing problems
 
 		!print*, "darkD=", darkD, " darkT=",darkT," darkC2=",darkC2," darkA=", darkA
-	   	RETURN
-	 END SUBROUTINE
+		RETURN
+	END SUBROUTINE
 
 END PROGRAM
 

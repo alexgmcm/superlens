@@ -229,7 +229,7 @@ do m=0, ztildesize
 ! 			end do
 			!light part truncated (transmitted wave)
 			do p=0, numkxpoints
-				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
+				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 

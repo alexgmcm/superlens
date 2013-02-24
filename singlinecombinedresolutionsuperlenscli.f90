@@ -22,7 +22,7 @@ integer*4 :: m, n, p, xtildesize, ztildesize,tilen, errflag, numkxpoints, etalim
 character :: filename*150, ti*10, cmd1*50, cmd2*50, cmd3*2, etalimitstring*2
 
 double precision :: darkstepfrac
-complex*16 :: darkkz1tilde, darkkz2tilde, darkdenominator, darkA, darkC2, darkD, darkT
+complex*32:: darkkz1tilde, darkkz2tilde, darkdenominator, darkA, darkC2, darkD, darkT
 
 
 !The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
@@ -229,7 +229,7 @@ do m=0, ztildesize
 			end do
 			!light part truncated (transmitted wave)
 			do p=0, numkxpoints
-				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
+				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*cutkxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
 					*(EXP( (-sigmatilde*(( kxtildeprime )**2)/2.0) & 

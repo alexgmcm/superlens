@@ -1,26 +1,25 @@
 #!/bin/sh
 
-seq 90 -10 90 > maxthetalist.txt
+seq 90 -10 10 > maxthetalist.txt
 seq 3.0 1.0 3.0 > secondinterfacelist.txt
-seq 30 1 30 > darkcutofflist.txt
+seq 30 2 30 > combcutofflist.txt
 
 
-while read darkcutoff
-do
-	echo "$darkcutoff"
+while read combcutoff
+	do
 	while read secint
 		do
 		echo "$secint"
 		while read maxtheta           
 			do   
 			echo "$maxtheta"        
-			./darktest.out $secint $maxtheta $darkcutoff
-			./matlab_batcher4.sh darkresolutionsuperlenscliscript $secint $maxtheta $darkcutoff
+			./singdark.out $secint $maxtheta $combcutoff
+			./matlab_batcher4.sh singdarkscript $secint $maxtheta $combcutoff
 
 		done <maxthetalist.txt
 		#./matlab_batcher.sh resolutionplotscliscript $secint
 	done <secondinterfacelist.txt
-done <darkcutofflist.txt
+done <combcutofflist.txt
 
 
 

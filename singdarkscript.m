@@ -1,6 +1,6 @@
-function singpropscript(secondinterface, thetamax, etacutoff)
+function singdarkscript(secondinterface, thetamax, etacutoff)
 gs='0.001';
-data(:,:,1) = load(strcat('data/singlinepropres',num2str(thetamax, '%3.1f'),'degs','3.1eta',gs,'sigmatilde',num2str(secondinterface,'%2.1f'),'secint',num2str(etacutoff,'%2i'),'etalimit.dat'));
+data(:,:,1) = load(strcat('data/singlinedarkres',num2str(thetamax, '%3.1f'),'degs','3.1eta',gs,'sigmatilde',num2str(secondinterface,'%2.1f'),'secint',num2str(etacutoff,'%2i'),'etalimit.dat'));
 x=data(:,1);
 intensity=data(:,3);
 
@@ -13,7 +13,7 @@ hold on;
 %hilbertfit=abs(hilbert(ximageaxis));
 %plot(xarray,hilbertfit,'-g');
 %ylim([0 7e-03])
-print('-dpng',strcat('plots/singlinepropimageprofile','kxcutoff',num2str(etacutoff,'%2i'),num2str(thetamax),'degsthetamax.png'));
+print('-dpng',strcat('plots/singlinedarkimageprofile','kxcutoff',num2str(etacutoff,'%2i'),num2str(thetamax),'degsthetamax.png'));
 hold off;
 
 
@@ -34,7 +34,7 @@ rightval=(secondhalfx(rightlowval)+secondhalfx(righthighval))/2;
 
 fwhm=rightval-leftval;
 
-fid = fopen(strcat('data/singlinepropplotdata',num2str(secondinterface),'secint.txt'), 'a');
+fid = fopen(strcat('data/singlinedarkplotdata',num2str(secondinterface),'secint.txt'), 'a');
 outdata = [fwhm;thetamax;etacutoff; maxval];
 fprintf(fid, '%6.4f %3.1f %3.1f %6.4e \n', outdata);
 fclose(fid);

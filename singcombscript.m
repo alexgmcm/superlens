@@ -35,8 +35,8 @@ rightval=(secondhalfx(rightlowval)+secondhalfx(righthighval))/2;
 fwhm=rightval-leftval;
 
 fid = fopen(strcat('data/singlinecombplotdata',num2str(secondinterface),'secint.txt'), 'a');
-outdata = [fwhm;thetamax;etacutoff];
-fprintf(fid, '%6.4f %3.1f %3.1f \n', outdata);
+outdata = [fwhm;thetamax;etacutoff; maxval];
+fprintf(fid, '%6.4f %3.1f %3.1f %6.4e \n', outdata);
 fclose(fid);
 
 

@@ -287,6 +287,7 @@ do m=0, ztildesize
 			else
 				if(modeflag/=0) then
 			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
+			!print*, "Doing dark parts. R3"
 			do p=0, darknumkxpoints
 				kxtildeprime= -(etalimit*eta) + p*kxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
@@ -305,7 +306,8 @@ do m=0, ztildesize
 		end if
 		if(modeflag/=2) then
 			!light part truncated (transmitted wave)
-			do p=0, numkxpoints
+			!print*, "Doing light parts. R3"
+			do p=0, cutnumkxpoints
 				kxtildeprime= (-eta*SIN(thetamaxrad)) + p*kxtildeprimestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde)) &
@@ -320,7 +322,7 @@ do m=0, ztildesize
 ! 		if(etatest.LT.0.0d0) then
 ! 			Eykspacearray(n,m)=0
 ! 		end if
-		write(2,10) xtilde, ztilde, (abs(Eykspace))**2, RealPart(Eykspace) !intensity - therefore squared
+		write(2,10) xtilde, ztilde, (abs(Eykspace))**2, Eykspace !intensity - therefore squared
 	end do
 
 	if (imageflag /= 0) then
@@ -333,6 +335,7 @@ end do
 10	format(4e15.5,4e15.5,4e15.5,4e15.5)
 20 	format(A,A,A,f4.1,A,f3.1,A,f5.3,A,f3.1,A,A,A)
 30  format(I2)
+!40 	format()
 
 !cmd='./matlab_batcher.sh superlenscliscript ', sigmatilde
 !write (cmd, "(A39,I2)") "hello", 10

@@ -1,18 +1,11 @@
-!darkresolutionsuperlenscli.f90
-!Fixing major bug due to incorrect integral limits"
-!therefore change kxtilde for kxtilde in integral
-!Single interface code using rotated frame approach but translated
-!to normal frame.
 !Supports command line interface for variables and calls to MATLAB for plotting.
 !added evanescent components
-!COPY FOR WORKING ON
-
-!have CLI just for second interface (to vary slab thickness) and thetamax, the maximum incident angle assumed to hit the slab
-!CLI: ./test.out SECONDINTERFACE THETAMAX
+!Command Line Interface is used to set various values and determine which code is run
+!The code
+!CLI EXAMPLE: ./test.out SECONDINTERFACE THETAMAX ETALIMIT MODEFLAG IMAGEFLAG SIGMATILDE
 PROGRAM masterresolutionsuperlenscli
 implicit none !doesn't assume types from names, must be declared explicitly
-!use strings
-! Declare stuff here - check these are all necessary
+! Declare variables here:
 double precision :: thetai, eta, xtildestepfrac, ztildestepfrac, kxtildestepfrac, dsourcetilde, secondinterface
 double precision :: xtildei, ztildei, c=3D8, xtildef, ztildef, PI, eps1, mu1, mu2, etatest, sigmatilde, smallval, thetamax 
 double precision :: thetamaxrad, ztilde, xtilde
@@ -28,7 +21,7 @@ complex*16 :: darkkz1tilde, darkkz2tilde, darkdenominator, darkA, darkC2, darkD,
 
 
 PI=4.D0*DATAN(1.D0) 
-!ensures maximum precision on any architechture apparently
+!ensures maximum precision on any architechture
 
 
 CALL GETARG(1,cmd1)
@@ -39,6 +32,8 @@ CALL GETARG(2,cmd2)
 READ(UNIT=cmd2, FMT=*) thetamax
 print*, "thetamax=", thetamax
 thetamaxrad = (thetamax/180.0)*PI
+!thetacutoff value entered in degrees so convert to radians
+
 
 CALL GETARG(3,cmd3)
 READ(UNIT=cmd3, FMT=*) etalimit
@@ -57,8 +52,9 @@ READ(UNIT=cmd6, FMT=*) sigmatilde
 !sigma is form of gaussian beamwidth parameter, here taken to be the squared value, dimensions of area
 !sigma tilde is sigma/d^2 so it is dimensionless parameter
 
-!The xtilde values etc. are the real values of x, turned into dimensionless parameters via the 'thickness' d
-! i.e. xtilde = x/d etc.
+!The xtilde values etc. are the real values of x, turned into dimensionless parameters via 
+!the source to first interface distance d_s
+! i.e. xtilde = x/d_s etc.
 xtildei=-1
 xtildef=1
 
@@ -83,11 +79,6 @@ dsourcetilde = 1
 !All distances are essentially in terms of dsourcetilde, however they will simply be given as numbers
 !as this makes passing them as commmand line arguments far far easier (and is equivalent as dsourcetilde=1)
 
-
-!secondinterface = 3*dsourcetilde
-
-!Parameters: use command line args in future http://web.utah.edu/thorne/computing/Handy_Fortran_Tricks.pdf
-
 eps1=1.0
 mu1=1.0
 eps2=-1.0
@@ -111,10 +102,7 @@ i = (0.0,1.0)
 !specialist csqrt etc. are obsolete
 
 eta = PI
-!go from 0.1 to 5, dimensionless parameter equal to omega*d/c
-! where d is the thickness of the slab and lambda is the free space wavelength of the incident light
-! w and d and lambda are all replaced by eta
-
+!dimensionless parameter equal to omega*d_s/c
 
 print*, "secondinterface=", secondinterface
 
@@ -151,12 +139,9 @@ END SELECT
 write(etalimitstring, 30) etalimit
 write(filename,20) 'data/',trim(adjustl(modestring)),trim(adjustl(imagestring)),thetamax,'degs',eta,'eta', &
 sigmatilde,'sigmatilde',secondinterface, 'secint',trim(adjustl(etalimitstring)),'etalimit.dat'
-!kx coefficients output for bug-checking
-!write(kxfilename,20) 'data/kx',trim(adjustl(modestring)),trim(adjustl(imagestring)),thetamax,'degs',eta,'eta', &
-!sigmatilde,'sigmatilde',secondinterface, 'secint',trim(adjustl(etalimitstring)),'etalimit.dat'
 
 open(unit=2,file= filename)
-!open(unit=3,file= kxfilename)
+
 do m=0, ztildesize
 	ztilde= ztildei + (m*ztildestepfrac)
 
@@ -270,18 +255,12 @@ do m=0, ztildesize
 			else
 				if(modeflag/=0) then
 			!DARK PARTS, between -infty and -eta, and eta and infty, sum the two, infty is taken as 5*eta
-			!print*, "Doing dark parts. R3"
 			do p=1, darknumkxpoints
 				kxtilde= -(etalimit*eta) + p*kxtildestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral=(darkT*exp(-darkkz1tilde*(ztilde- 3*dsourcetilde))) * kxtildestepfrac *exp(i*kxtilde*xtilde)*&
 				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtilde )**2)/2.0)))
 				Eykspace = Eykspace + integral
-
-				!if (ztilde==4.0 .and. xtilde<1.0E-05 .and. xtilde>-1.0E-05) then
-				!	write(3,15) abs(kxtilde), abs(darkA), abs(darkC2), abs(darkD), abs(darkT)
-				!	!imag part is always 0 anyway
-				!end if
 
 			end do
 			!Dark parts upper limits
@@ -292,41 +271,21 @@ do m=0, ztildesize
 				((1.0/sqrt(2*PI))*sqrt(sigmatilde)) *(EXP( (-sigmatilde*(( kxtilde )**2)/2.0)))
 				Eykspace = Eykspace + integral
 
-				!if (ztilde==4.0 .and. xtilde<1.0E-05 .and. xtilde>-1.0E-05) then
-				!	write(3,15) abs(kxtilde), abs(darkA), abs(darkC2), abs(darkD), abs(darkT)
-				!end if
-
 			end do
 		end if
 		if(modeflag/=2) then
 			!light part truncated (transmitted wave)
-			!print*, "Doing light parts. R3"
 			do p=1, cutnumkxpoints
 				kxtilde= (-eta*SIN(thetamaxrad)) + p*kxtildestepfrac !this part depends on limits
 				call SHAREDINTEGRALCODE()
 				integral= ((1.0/sqrt(2*PI))*sqrt(sigmatilde))
-				!print*,"1 ", integral
 				integral=integral*(EXP( (-sigmatilde*(( kxtilde )**2)/2.0)))
-				!print*,"2 ", integral
 				integral=integral*(EXP(i*kxtilde*xtilde))
-				!print*,"3 ", integral
 				integral=integral*(EXP((i* kxtilde* xtilde )))
-				!print*,"4 ", integral
 				integral=integral*(EXP(i*kz1tilde*ztilde))
-				!print*,"5 ", integral
 				integral = integral*kxtildestepfrac
-				!print*,"6 ", integral
-				!print*,"t ", t
 				addterm = (t*integral)
-				!print*,"addterm ", addterm
-				!print*,"Eykspace: ", Eykspace
 				Eykspace = Eykspace + addterm
-				!print*,"Eykspace: ", Eykspace
-				
-				!if (ztilde==4.0 .and. xtilde<1.0E-05 .and. xtilde>-1.0E-05) then
-				!	write(3,15) abs(kxtilde), abs(r), abs(Ce), abs(De), abs(t)
-				!end if
-
 			end do
 		end if
 	end if
@@ -346,14 +305,6 @@ end do
 15  format(4e15.5,4e15.5,4e15.5,4e15.5,4e15.5)
 20 	format(A,A,A,f4.1,A,f3.1,A,f5.3,A,f3.1,A,A,A)
 30  format(I2)
-!40 	format()
-
-!cmd='./matlab_batcher.sh superlenscliscript ', sigmatilde
-!write (cmd, "(A39,I2)") "hello", 10
-
-!CALL SYSTEM(cmd)
-
-
 
 CONTAINS
 SUBROUTINE SHAREDINTEGRALCODE()
@@ -389,19 +340,14 @@ kz2tilde=sqrt((n2*eta)**2 - kxtilde**2)
 		De=(2*(chi - 1)*A*(B**(-1))) / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) )
 		t=(chi/D)*( (4*A* (B**(-1)) *(C2**(-1)))  / ( (((chi + 1)**2)*(C2**(-2)))  - (((chi - 1)**2)*(B**(-2))) ) )		
 
-		!print*, "r=", r, " ce=",Ce," De=",De," t=",t
-
 		darkdenominator=(((chi+1)**2)-((chi-1)**2)*exp(-4*darkkz2tilde*dsourcetilde)) 
 		darkD=((2*(chi-1)*exp(-darkkz1tilde*dsourcetilde)*exp(-2*darkkz2tilde)*dsourcetilde))/darkdenominator
 		darkT=(4*chi*exp(-darkkz1tilde*dsourcetilde)*exp(-2*darkkz2tilde*dsourcetilde))/darkdenominator
 		darkC2=(2*exp(-darkkz1tilde*dsourcetilde)*(chi+1))/darkdenominator
 		!darkA=darkC2 + darkD*exp(-2*darkkz2tilde*dsourcetilde) - exp(-darkkz1tilde*dsourcetilde)
-		darkA=0 !should be zero but floating point is causing problems
+		darkA=0 !should be zero but floating point is causing problems, so set as 0
 
-		!print*, "darkD=", darkD, " darkT=",darkT," darkC2=",darkC2," darkA=", darkA
 		RETURN
 	END SUBROUTINE
 
 END PROGRAM
-
-!

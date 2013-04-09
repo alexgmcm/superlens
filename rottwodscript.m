@@ -1,4 +1,4 @@
-function twodscript(secondinterface, thetamax, g, string)
+function rottwodscript(secondinterface, thetamax, g, string)
 %eyabs is now intensity
 zi=0;
 xi=-10;
@@ -60,13 +60,13 @@ while (i <= size)
 	 j=1;
 end
 
-k=imagesc(xarray,zarray,log(intensarray)); %log or cut off maxcolor???
+k=imagesc(xarray,zarray,intensarray); %log or cut off maxcolor???
 xlabel('x/dsource','FontSize',16);
 ylabel('z/dsource','FontSize',16);
 %title(strcat('g=',gs,',thetai=',num2str(thetai),'degs,mu1=1, mu2=',num2str(mu2),', eps1=1, eps2=',num2str(eps2),', eta=',eta,' kxcutoff=',kxcutoff ));
-title(strcat('logarithmic plot of intensity, sigma=',gs,',  ',string ),'FontSize',16);
+title(strcat('normal plot of intensity, sigma=',gs,',  ',string ),'FontSize',16);
 colorbar;
-caxis([-10 20]);
+%caxis([-10 20]);
 line([xi xf],[dsource dsource],'linewidth',4,'Color', 'k');
 line([xi xf],[secondinterface secondinterface],'linewidth',4,'Color', 'k');
 %line([xi xf],[0 0],'linewidth',4,'Color', 'k');

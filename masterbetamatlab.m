@@ -26,6 +26,18 @@ legend('propagating only','combined', 'dark');
 print('-dpng',strcat('plots/intensityoverlaysigma',num2str(sigma,'%5.3f'),'.png'));
 hold off;
 
+plot((propx/2),propintensity,'-r','LineWidth',4);
+title(strcat('Intensity versus x (in lambda), symmetric case, sigma=',num2str(sigma,'%5.3f')),'FontSize',16);
+xlabel('x / $\lambda$', 'Interpreter', 'LaTex','FontSize',16);
+ylabel('Intensity , EE*','FontSize',16);
+hold on;
+plot((combx/2),combintensity,'-b','LineWidth',4);
+plot((darkx/2),darkintensity,'-g','LineWidth',4);
+leg=legend('propagating only','combined', 'dark')
+set(leg,'FontSize',16)
+print('-depsc2',strcat('plots/intensityoverlaylambdasigma',num2str(sigma,'%5.3f'),'.eps'));
+hold off;
+
 plot(propx,propefield,'-r');
 title(strcat('E_y versus x (in dsource), symmetric case, sigma=',num2str(sigma,'%5.3f')));
 xlabel('x / dsource');
@@ -36,5 +48,17 @@ plot(darkx,darkefield,'-g');
 legend('propagating only','combined', 'dark');
 print('-dpng',strcat('plots/efieldoverlaysigma',num2str(sigma,'%5.3f'),'.png'));
 hold off;
+
+plot((propx/2),propefield,'-r');
+title(strcat('E_y versus x (in lambda), symmetric case, sigma=',num2str(sigma,'%5.3f')));
+xlabel('x / $\lambda$', 'Interpreter', 'LaTex');
+ylabel('E_y');
+hold on;
+plot((combx/2),combefield,'-b');
+plot((darkx/2),darkefield,'-g');
+legend('propagating only','combined', 'dark');
+print('-dpng',strcat('plots/efieldoverlaylambdasigma',num2str(sigma,'%5.3f'),'.png'));
+hold off;
+
 
 end
